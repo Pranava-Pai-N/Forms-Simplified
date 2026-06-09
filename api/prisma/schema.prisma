@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  runtime  = "workerd"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   
+  name      String
+  createdAt DateTime @default(now())
+
+  createdSurveys Survey[]       @relation("SurveyCreator")
+  answers        SurveyAnswer[]
+}
+
+model Survey {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  creatorId   String
+  createdAt   DateTime   @default(now())
+  creator     User       @relation("SurveyCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  questions   Question[]
+}
+
+model Question {
+  id         String       @id @default(uuid())
+  surveyId   String
+  text       String
+  type       questionType
+  isRequired Boolean      @default(true)
+  order      Int          @default(0)
+
+  survey  Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  answers SurveyAnswer[]
+}
+
+enum questionType {
+  short_text
+  multiple_choice
+  rating
+}
+
+model SurveyAnswer {
+  id         String   @id @default(uuid())
+  questionId String
+  userId     String
+  value      String
+  createdAt  DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, userId])
+}

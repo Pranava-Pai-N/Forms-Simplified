@@ -10,10 +10,23 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "hono": "^4.12.22"
+    "@prisma/adapter-d1": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@prisma/client-runtime-utils": "^7.8.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "hono": "^4.12.22",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.21.0"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node": "^25.9.2",
+    "@types/pg": "^8.20.0",
+    "prisma": "^7.8.0",
     "typescript": "^6.0.3",
     "wrangler": "^4.94.0"
   }
