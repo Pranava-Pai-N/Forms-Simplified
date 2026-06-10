@@ -7,23 +7,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    await logout();
-    toast.success("Logged out successfully.")
+    await logout()
+    toast.success('Logged out successfully.')
     navigate({ to: '/login' })
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-
-          <h1 className="text-lg font-semibold tracking-tight">
-            FormSimplified
-          </h1>
+          <h1 className="text-lg font-semibold tracking-tight">FormSimplified</h1>
 
           <nav className="flex items-center gap-4 text-sm text-slate-300">
-
             <Link to="/" className="hover:text-white transition">
               Home
             </Link>
@@ -35,18 +30,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
 
                 <div className="flex items-center gap-3 ml-2">
-
                   <img
-                    src={
-                      user?.profileImage
-                    }
+                    src={user?.profileImage}
                     alt="Profile"
                     className="h-9 w-9 rounded-full border border-slate-700 object-cover"
                   />
 
-                  <span className="hidden sm:block text-slate-300">
-                    {user.email}
-                  </span>
+                  <span className="hidden sm:block text-slate-300">{user.email}</span>
 
                   <button
                     type="button"
@@ -78,9 +68,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        {children}
-      </main>
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">{children}</main>
     </div>
   )
 }

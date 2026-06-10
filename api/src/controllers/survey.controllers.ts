@@ -1,25 +1,30 @@
-import { connectDB } from "../lib/database";
+import { connectDB } from '../lib/database'
 
 const createSurvey = async (content: any) => {
   try {
-    const body = await content.req.json();
+    const body = await content.req.json()
 
+    const user = content.get('user')
 
-    const user = content.get("user");
+    const { title, description, coverImage, primaryColor, questions } = body
 
-    const { title, description, coverImage, primaryColor, questions } = body;
-
-    if (!title || !coverImage || !primaryColor || !Array.isArray(questions) || questions.length === 0) {
+    if (
+      !title ||
+      !coverImage ||
+      !primaryColor ||
+      !Array.isArray(questions) ||
+      questions.length === 0
+    ) {
       return content.json(
         {
           success: false,
-          message: "Please provide valid survey data.",
+          message: 'Please provide valid survey data.',
         },
-        400
-      );
+        400,
+      )
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE);
+    const prisma = connectDB(content.env.HYPERDRIVE)
 
     const survey = await prisma.survey.create({
       data: {
@@ -44,162 +49,160 @@ const createSurvey = async (content: any) => {
       },
       include: {
         questions: {
-          orderBy: { order: "asc" },
+          orderBy: { order: 'asc' },
         },
       },
-    });
+    })
 
-    return content.json({ success: true, survey }, 201);
-
+    return content.json({ success: true, survey }, 201)
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return content.json(
       {
         success: false,
-        message: "Error creating survey.",
+        message: 'Error creating survey.',
       },
-      500
-    );
+      500,
+    )
   }
-};
+}
 
 const getUserSurveys = async (content: any) => {
   try {
-    const user = content.get("user");
-    const id = user.id;
-    const prisma = connectDB(content.env.HYPERDRIVE);
+    const user = content.get('user')
+    const id = user.id
+    const prisma = connectDB(content.env.HYPERDRIVE)
 
     const userSurveys = await prisma.user.findUnique({
       where: { id },
       include: {
         createdSurveys: {
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
         },
       },
-    });
+    })
 
     return content.json(
       {
         success: true,
-        message: "All surveys created by user retrieved successfully",
+        message: 'All surveys created by user retrieved successfully',
         surveys: userSurveys?.createdSurveys ?? [],
       },
-      200
-    );
+      200,
+    )
   } catch (error) {
     return content.json(
       {
         success: false,
-        message: "Error fetching surveys",
+        message: `Error fetching surveys, ${error} `,
       },
-      500
-    );
+      500,
+    )
   }
-};
+}
 
 const getSurveyById = async (content: any) => {
   try {
-    const surveyId = content.req.param("id");
+    const surveyId = content.req.param('id')
 
     if (!surveyId) {
       return content.json(
         {
           success: false,
-          message: "Please provide a valid survey id.",
+          message: 'Please provide a valid survey id.',
         },
-        400
-      );
+        400,
+      )
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE);
+    const prisma = connectDB(content.env.HYPERDRIVE)
 
     const survey = await prisma.survey.findUnique({
       where: { id: surveyId },
       include: {
         questions: {
-          orderBy: { order: "asc" },
+          orderBy: { order: 'asc' },
         },
       },
-    });
+    })
 
     if (!survey) {
       return content.json(
         {
           success: false,
-          message: "Survey not found.",
+          message: 'Survey not found.',
         },
-        404
-      );
+        404,
+      )
     }
 
-    return content.json({ success: true, survey }, 200);
-
+    return content.json({ success: true, survey }, 200)
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return content.json(
       {
         success: false,
-        message: "Error fetching survey.",
+        message: 'Error fetching survey.',
       },
-      500
-    );
+      500,
+    )
   }
-};
+}
 
 const updateSurvey = async (content: any) => {
   try {
-    const surveyId = content.req.param("id");
+    const surveyId = content.req.param('id')
 
-    const user = content.get('user');
+    const user = content.get('user')
 
-    const body = await content.req.json();
+    const body = await content.req.json()
 
     if (!surveyId) {
       return content.json(
         {
           success: false,
-          message: "Please provide a valid survey id.",
+          message: 'Please provide a valid survey id.',
         },
-        400
-      );
+        400,
+      )
     }
 
-    const { title, description, coverImage, primaryColor, questions } = body;
+    const { title, description, coverImage, primaryColor, questions } = body
 
     if (!title || !coverImage || !primaryColor || !Array.isArray(questions)) {
       return content.json(
         {
           success: false,
-          message: "Please provide valid survey data.",
+          message: 'Please provide valid survey data.',
         },
-        400
-      );
+        400,
+      )
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE);
+    const prisma = connectDB(content.env.HYPERDRIVE)
 
     const existingSurvey = await prisma.survey.findUnique({
       where: { id: surveyId },
-    });
+    })
 
     if (!existingSurvey) {
       return content.json(
         {
           success: false,
-          message: "Survey not found.",
+          message: 'Survey not found.',
         },
-        404
-      );
+        404,
+      )
     }
 
     if (existingSurvey.creatorId !== user.id) {
       return content.json(
         {
           success: false,
-          message: "Unauthorized to update this survey.",
+          message: 'Unauthorized to update this survey.',
         },
-        403
-      );
+        403,
+      )
     }
 
     const survey = await prisma.survey.update({
@@ -223,48 +226,47 @@ const updateSurvey = async (content: any) => {
       },
       include: {
         questions: {
-          orderBy: { order: "asc" },
+          orderBy: { order: 'asc' },
         },
       },
-    });
+    })
 
-    return content.json({ success: true, survey }, 200);
-
+    return content.json({ success: true, survey }, 200)
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return content.json(
       {
         success: false,
-        message: "Error updating survey.",
+        message: 'Error updating survey.',
       },
-      500
-    );
+      500,
+    )
   }
-};
+}
 
 const surveyResponsesbyId = async (content: any) => {
-  const surveyId = content.req.param("id");
+  const surveyId = content.req.param('id')
 
   if (!surveyId) {
     return content.json(
       {
         success: false,
-        message: "Please provide a valid survey Id..."
+        message: 'Please provide a valid survey Id...',
       },
-      400
-    );
+      400,
+    )
   }
-  const prisma = connectDB(content.env.HYPERDRIVE);
+  const prisma = connectDB(content.env.HYPERDRIVE)
 
   try {
     const survey = await prisma.survey.findUnique({
       where: {
-        id: surveyId
+        id: surveyId,
       },
 
       include: {
         questions: {
-          orderBy: { order: "asc" },
+          orderBy: { order: 'asc' },
           include: {
             answers: {
               include: {
@@ -272,7 +274,7 @@ const surveyResponsesbyId = async (content: any) => {
                   select: {
                     id: true,
                     email: true,
-                    name: true
+                    name: true,
                   },
                 },
               },
@@ -280,41 +282,41 @@ const surveyResponsesbyId = async (content: any) => {
           },
         },
       },
-    });
+    })
 
     if (!survey) {
       return content.json(
         {
           success: false,
-          message: "Survey not found .."
+          message: 'Survey not found ..',
         },
-        404
-      );
+        404,
+      )
     }
 
-    const responses: Record<string, any> = {};
+    const responses: Record<string, any> = {}
 
     survey.questions.forEach((question) => {
       question.answers.forEach((ans) => {
-        const userId = ans.user.id;
+        const userId = ans.user.id
 
         if (!responses[userId]) {
           responses[userId] = {
             user: ans.user,
-            answers: []
-          };
-        };
+            answers: [],
+          }
+        }
 
         responses[userId].answers.push({
           questionId: question.id,
           question: question.text,
           type: question.type,
           value: ans.value,
-        });
-      });
-    });
+        })
+      })
+    })
 
-    const responseResult = Object.values(responses);
+    const responseResult = Object.values(responses)
 
     return content.json({
       success: true,
@@ -323,19 +325,18 @@ const surveyResponsesbyId = async (content: any) => {
         title: survey.title,
       },
       responseResult,
-    });
-
+    })
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return content.json(
       {
         success: false,
         message: `Something went wrong. Please try again later, ${error}`,
       },
-      500
-    );
+      500,
+    )
   }
-};
+}
 
 const surveyControllers = {
   createSurvey,
@@ -343,6 +344,6 @@ const surveyControllers = {
   getSurveyById,
   updateSurvey,
   surveyResponsesbyId,
-};
+}
 
-export default surveyControllers;
+export default surveyControllers

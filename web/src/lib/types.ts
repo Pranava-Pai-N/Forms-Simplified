@@ -1,4 +1,4 @@
-export type QuestionType = "short_text" | "rating" | "multiple_choice";
+export type QuestionType = 'short_text' | 'rating' | 'multiple_choice'
 
 export type Question = {
   id: string
@@ -33,7 +33,7 @@ export type User = {
   name: string
   email: string
   profileImage: string
-  createdAt: Date,
-  createdSurveys: Survey[],
+  createdAt: Date
+  createdSurveys: Survey[]
   answers: SurveyPayload[]
 }

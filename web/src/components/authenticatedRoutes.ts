@@ -1,14 +1,11 @@
-import { redirect } from "@tanstack/react-router";
-
-
+import { redirect } from '@tanstack/react-router'
 
 export const requireAuth = async ({ context }: any) => {
-    const { user } = context;
+  const { user } = context
 
-    if (!user) {
-        throw redirect({
-            to: "/login"
-        })
-    }
-
+  if (!user) {
+    throw redirect({
+      to: '/login',
+    })
+  }
 }

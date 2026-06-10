@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { requireAuth } from '@/components/authenticatedRoutes'
 import { getSurvey, updateSurvey } from '../../lib/api'
-import type { Question, QuestionType, Survey, SurveyPayload } from '../../lib/types';
-import { requireAuth } from "@/components/authenticatedRoutes";
+import type { Question, QuestionType, Survey, SurveyPayload } from '../../lib/types'
 
 export const Route = createFileRoute('/survey/$id')({
   beforeLoad: requireAuth,
@@ -17,7 +17,7 @@ const questionTypes: Array<{ label: string; value: QuestionType }> = [
 
 export function SurveyEditorPage() {
   const { id } = Route.useParams() as { id: string }
-  const navigate = useNavigate()
+  const _navigate = useNavigate()
   const [survey, setSurvey] = useState<Survey | null>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -45,7 +45,7 @@ export function SurveyEditorPage() {
   }, [id])
 
   useEffect(() => {
-    if (!survey) return;
+    if (!survey) return
 
     setTitle(survey.title)
     setDescription(survey.description ?? '')
@@ -58,7 +58,7 @@ export function SurveyEditorPage() {
       survey.questions.forEach((q) => {
         if (q.type === 'multiple_choice') {
           const serverString = (q.options ?? []).join(', ')
-          
+
           const localCleaned = (prev[q.id] ?? '')
             .split(',')
             .map((o) => o.trim())
@@ -89,7 +89,10 @@ export function SurveyEditorPage() {
       <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-10 text-center text-slate-300">
         <p className="text-xl font-semibold text-white">Survey not found</p>
         <p className="mt-3">This form may have been deleted or the URL is invalid.</p>
-        <Link to="/dashboard" className="mt-6 inline-flex rounded-full bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400">
+        <Link
+          to="/dashboard"
+          className="mt-6 inline-flex rounded-full bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
+        >
           Back to dashboard
         </Link>
       </div>
@@ -105,28 +108,34 @@ export function SurveyEditorPage() {
               ...update,
               options:
                 update.type === 'multiple_choice'
-                  ? update.options ?? question.options ?? []
-                  : question.type === 'multiple_choice' && (update.type as string) !== 'multiple_choice'
+                  ? (update.options ?? question.options ?? [])
+                  : question.type === 'multiple_choice' &&
+                      (update.type as string) !== 'multiple_choice'
                     ? undefined
                     : question.options,
             }
-          : question
-      )
+          : question,
+      ),
     )
   }
 
   const addQuestion = (type: QuestionType) => {
     const newId = `${type}-${Date.now()}`
-    
+
     if (type === 'multiple_choice') {
-      setRawOptionsInput(prev => ({ ...prev, [newId]: 'Option 1, Option 2' }))
+      setRawOptionsInput((prev) => ({ ...prev, [newId]: 'Option 1, Option 2' }))
     }
 
     setQuestions((current) => [
       ...current,
       {
         id: newId,
-        text: type === 'short_text' ? 'New short answer question' : type === 'multiple_choice' ? 'New multiple choice question' : 'How would you rate this?',
+        text:
+          type === 'short_text'
+            ? 'New short answer question'
+            : type === 'multiple_choice'
+              ? 'New multiple choice question'
+              : 'How would you rate this?',
         type,
         isRequired: false,
         order: current.length,
@@ -145,11 +154,11 @@ export function SurveyEditorPage() {
   }
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault()
 
     if (!title.trim()) {
       setMessage('Survey title is required.')
-      return;
+      return
     }
 
     const payload: SurveyPayload = {
@@ -160,7 +169,7 @@ export function SurveyEditorPage() {
       questions: questions.map((question, index) => ({
         ...question,
         order: index,
-        options: question.type === 'multiple_choice' ? question.options ?? [] : undefined,
+        options: question.type === 'multiple_choice' ? (question.options ?? []) : undefined,
       })),
     }
 
@@ -180,7 +189,9 @@ export function SurveyEditorPage() {
           <div>
             <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Edit survey</p>
             <h1 className="mt-3 text-3xl font-semibold text-white">{survey.title}</h1>
-            <p className="mt-2 text-slate-400">Update your survey description, visual style, and question list.</p>
+            <p className="mt-2 text-slate-400">
+              Update your survey description, visual style, and question list.
+            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -203,7 +214,11 @@ export function SurveyEditorPage() {
 
       <form className="grid gap-8 lg:grid-cols-[1.5fr_1fr]" onSubmit={handleSave}>
         <div className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-xl shadow-slate-950/10">
-          {message ? <p className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">{message}</p> : null}
+          {message ? (
+            <p className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+              {message}
+            </p>
+          ) : null}
           <div className="space-y-4">
             <label className="block">
               <span className="text-sm text-slate-300">Survey name</span>
@@ -252,7 +267,9 @@ export function SurveyEditorPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Questions</p>
-              <p className="mt-2 text-slate-400">Drag and drop later for more advanced workflows.</p>
+              <p className="mt-2 text-slate-400">
+                Drag and drop later for more advanced workflows.
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               {questionTypes.map((type) => (
@@ -270,13 +287,20 @@ export function SurveyEditorPage() {
 
           <div className="space-y-4">
             {questions.map((question, index) => (
-              <div key={question.id} className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5">
+              <div
+                key={question.id}
+                className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Question {index + 1}</p>
+                    <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+                      Question {index + 1}
+                    </p>
                     <input
                       value={question.text}
-                      onChange={(event) => handleQuestionChange(question.id, { text: event.target.value })}
+                      onChange={(event) =>
+                        handleQuestionChange(question.id, { text: event.target.value })
+                      }
                       className="mt-3 w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-indigo-500"
                     />
                   </div>
@@ -294,7 +318,11 @@ export function SurveyEditorPage() {
                     <span className="text-sm text-slate-300">Question type</span>
                     <select
                       value={question.type}
-                      onChange={(event) => handleQuestionChange(question.id, { type: event.target.value as QuestionType })}
+                      onChange={(event) =>
+                        handleQuestionChange(question.id, {
+                          type: event.target.value as QuestionType,
+                        })
+                      }
                       className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-indigo-500"
                     >
                       {questionTypes.map((option) => (
@@ -308,7 +336,9 @@ export function SurveyEditorPage() {
                     <input
                       type="checkbox"
                       checked={question.isRequired}
-                      onChange={(event) => handleQuestionChange(question.id, { isRequired: event.target.checked })}
+                      onChange={(event) =>
+                        handleQuestionChange(question.id, { isRequired: event.target.checked })
+                      }
                       className="h-4 w-4 rounded border-slate-600 bg-slate-950 text-indigo-500"
                     />
                     <span className="text-sm text-slate-300">Required</span>
@@ -322,9 +352,9 @@ export function SurveyEditorPage() {
                       value={rawOptionsInput[question.id] ?? ''}
                       onChange={(event) => {
                         const nextVal = event.target.value
-                        
-                        setRawOptionsInput(prev => ({ ...prev, [question.id]: nextVal }))
-                        
+
+                        setRawOptionsInput((prev) => ({ ...prev, [question.id]: nextVal }))
+
                         const cleanArray = nextVal
                           .split(',')
                           .map((o) => o.trim())
@@ -338,7 +368,9 @@ export function SurveyEditorPage() {
                     <p className="mt-2 text-sm text-slate-500">Separate options with commas.</p>
                   </label>
                 ) : question.type === 'rating' ? (
-                  <p className="mt-4 text-sm text-slate-400">Respondents will choose a rating from 1 to 5.</p>
+                  <p className="mt-4 text-sm text-slate-400">
+                    Respondents will choose a rating from 1 to 5.
+                  </p>
                 ) : null}
               </div>
             ))}

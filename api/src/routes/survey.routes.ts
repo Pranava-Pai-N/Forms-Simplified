@@ -1,17 +1,17 @@
-import { Hono } from 'hono';
-import surveyControllers from '../controllers/survey.controllers';
-import authMiddleware from '../middlewares/auth.middleware';
+import { Hono } from 'hono'
+import surveyControllers from '../controllers/survey.controllers'
+import authMiddleware from '../middlewares/auth.middleware'
 
 type Bindings = {
-    DB : D1Database
+  DB: D1Database
 }
 
 const surveyRoutes = new Hono<{ Bindings: Bindings }>()
 
-surveyRoutes.post('/', authMiddleware, surveyControllers.createSurvey);
-surveyRoutes.get('/', authMiddleware, surveyControllers.getUserSurveys);
-surveyRoutes.get('/:id/responses', authMiddleware, surveyControllers.surveyResponsesbyId);
-surveyRoutes.get('/:id', surveyControllers.getSurveyById);
-surveyRoutes.put('/:id', authMiddleware, surveyControllers.updateSurvey);
+surveyRoutes.post('/', authMiddleware, surveyControllers.createSurvey)
+surveyRoutes.get('/', authMiddleware, surveyControllers.getUserSurveys)
+surveyRoutes.get('/:id/responses', authMiddleware, surveyControllers.surveyResponsesbyId)
+surveyRoutes.get('/:id', surveyControllers.getSurveyById)
+surveyRoutes.put('/:id', authMiddleware, surveyControllers.updateSurvey)
 
-export default surveyRoutes;
+export default surveyRoutes

@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { getSurvey } from '../../../lib/api';
-import { getSurveyResponses } from '../../../lib/storage';
-import { requireAuth } from "@/components/authenticatedRoutes";
-import type { Survey } from "../../../lib/types"
+import { requireAuth } from '@/components/authenticatedRoutes'
+import { getSurvey } from '../../../lib/api'
+import { getSurveyResponses } from '../../../lib/storage'
+import type { Survey } from '../../../lib/types'
 
 export const Route = createFileRoute('/survey/$id/responses')({
-  beforeLoad : requireAuth,
+  beforeLoad: requireAuth,
   component: SurveyResponsesPage,
 })
 
@@ -37,40 +37,61 @@ function SurveyResponsesPage() {
       <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-10 text-center text-slate-300">
         <p className="text-xl font-semibold text-white">Survey not found</p>
         <p className="mt-3">The form you are looking for could not be found.</p>
-        <Link to="/dashboard" className="mt-6 inline-flex rounded-full bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400">
+        <Link
+          to="/dashboard"
+          className="mt-6 inline-flex rounded-full bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
+        >
           Back to dashboard
         </Link>
       </div>
     )
   }
 
-  const questionViews = survey.questions.map((question : any) => {
+  const questionViews = survey.questions.map((question: any) => {
     const answers = responses
       .map((response) => response.answers.find((answer) => answer.questionId === question.id))
       .filter((answer): answer is { questionId: string; value: string } => Boolean(answer))
 
     return (
       <div key={question.id} className="rounded-3xl border border-slate-800 bg-slate-950/90 p-6">
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{question.type === 'short_text' ? 'Short answer' : question.type === 'multiple_choice' ? 'Multiple choice' : 'Rating'}</p>
+        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">
+          {question.type === 'short_text'
+            ? 'Short answer'
+            : question.type === 'multiple_choice'
+              ? 'Multiple choice'
+              : 'Rating'}
+        </p>
         <p className="mt-3 text-lg font-semibold text-white">{question.text}</p>
-        <p className="mt-3 text-sm text-slate-400">{answers.length} answer{answers.length === 1 ? '' : 's'}</p>
+        <p className="mt-3 text-sm text-slate-400">
+          {answers.length} answer{answers.length === 1 ? '' : 's'}
+        </p>
         {question.type === 'rating' ? (
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
             {[1, 2, 3, 4, 5].map((value) => (
-              <div key={value} className="rounded-2xl border border-slate-700 bg-slate-900 p-3 text-center text-sm text-slate-200">
+              <div
+                key={value}
+                className="rounded-2xl border border-slate-700 bg-slate-900 p-3 text-center text-sm text-slate-200"
+              >
                 <p className="font-semibold text-white">{value}</p>
-                <p className="text-slate-400">{answers.filter((answer) => answer.value === String(value)).length}</p>
+                <p className="text-slate-400">
+                  {answers.filter((answer) => answer.value === String(value)).length}
+                </p>
               </div>
             ))}
           </div>
         ) : (
           <div className="mt-4 space-y-2 text-sm text-slate-300">
             {answers.slice(0, 5).map((answer, index) => (
-              <div key={`${question.id}-${index}`} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+              <div
+                key={`${question.id}-${index}`}
+                className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3"
+              >
                 {answer.value}
               </div>
             ))}
-            {answers.length > 5 ? <p className="text-slate-500">+{answers.length - 5} more answers</p> : null}
+            {answers.length > 5 ? (
+              <p className="text-slate-500">+{answers.length - 5} more answers</p>
+            ) : null}
           </div>
         )}
       </div>

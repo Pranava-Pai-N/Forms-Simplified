@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import { requireAuth } from '@/components/authenticatedRoutes'
 import { getUserSurveys } from '../../lib/api'
 import type { Survey } from '../../lib/types'
-import { toast } from 'sonner';
-import { requireAuth } from "@/components/authenticatedRoutes"
 
 export const Route = createFileRoute('/dashboard/')({
   component: DashboardPage,
-  beforeLoad : requireAuth
+  beforeLoad: requireAuth,
 })
 
 function DashboardPage() {
@@ -31,15 +31,23 @@ function DashboardPage() {
   const cards = useMemo(
     () =>
       surveys.map((survey) => (
-        <div key={survey.id} className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5">
+        <div
+          key={survey.id}
+          className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5"
+        >
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Your Surveys</p>
               <h2 className="mt-3 text-xl font-semibold text-white">{survey.title}</h2>
             </div>
-            <div className="h-12 w-12 rounded-2xl" style={{ backgroundColor: survey.primaryColor }} />
+            <div
+              className="h-12 w-12 rounded-2xl"
+              style={{ backgroundColor: survey.primaryColor }}
+            />
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-400">{survey.description ?? 'No description added yet.'}</p>
+          <p className="mt-4 text-sm leading-6 text-slate-400">
+            {survey.description ?? 'No description added yet.'}
+          </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               to="/survey/$id"
@@ -59,8 +67,10 @@ function DashboardPage() {
               type="button"
               className="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200"
               onClick={() => {
-                navigator.clipboard.writeText(`${import.meta.env.VITE_FRONTEND_URL}/public/${survey.id}`);
-                toast.success("Copied to clipboard successfully ...")
+                navigator.clipboard.writeText(
+                  `${import.meta.env.VITE_FRONTEND_URL}/public/${survey.id}`,
+                )
+                toast.success('Copied to clipboard successfully ...')
               }}
             >
               Copy public link
@@ -68,7 +78,7 @@ function DashboardPage() {
           </div>
         </div>
       )),
-    [surveys]
+    [surveys],
   )
 
   return (
@@ -77,8 +87,12 @@ function DashboardPage() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Your forms</p>
-            <h1 className="mt-3 text-4xl font-semibold text-white">Manage every survey in one place.</h1>
-            <p className="mt-4 max-w-2xl text-slate-400">Create new forms, review responses, and share a public link with anyone.</p>
+            <h1 className="mt-3 text-4xl font-semibold text-white">
+              Manage every survey in one place.
+            </h1>
+            <p className="mt-4 max-w-2xl text-slate-400">
+              Create new forms, review responses, and share a public link with anyone.
+            </p>
           </div>
           <Link
             to="/survey/new"
@@ -93,11 +107,15 @@ function DashboardPage() {
         <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-slate-950/20">
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Active forms</p>
           <p className="mt-4 text-5xl font-semibold text-white">{activeCount}</p>
-          <p className="mt-2 text-sm text-slate-400">Surveys available on your public share links.</p>
+          <p className="mt-2 text-sm text-slate-400">
+            Surveys available on your public share links.
+          </p>
         </div>
         <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-slate-950/20">
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Recent activity</p>
-          <p className="mt-4 text-sm leading-7 text-slate-400">Create a new survey to see response history and summary cards here.</p>
+          <p className="mt-4 text-sm leading-7 text-slate-400">
+            Create a new survey to see response history and summary cards here.
+          </p>
         </div>
       </div>
 

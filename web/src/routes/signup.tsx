@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useAuth } from '../hooks/useAuth';
-import { toast } from "sonner"
+import { toast } from 'sonner'
+import { useAuth } from '../hooks/useAuth'
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
@@ -22,8 +22,8 @@ function SignupPage() {
     setMessage(null)
 
     try {
-      await signup({ name, email, password });
-      toast.success("Please login with the credentials ...");
+      await signup({ name, email, password })
+      toast.success('Please login with the credentials ...')
       navigate({ to: '/login' })
     } catch (error: any) {
       setMessage(error.message ?? 'Signup failed')
@@ -40,7 +40,9 @@ function SignupPage() {
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit}>
-        {message ? <p className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{message}</p> : null}
+        {message ? (
+          <p className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{message}</p>
+        ) : null}
         <label className="block">
           <span className="text-sm text-slate-300">Name</span>
           <input

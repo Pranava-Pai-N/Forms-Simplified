@@ -66,7 +66,7 @@ export function updateSurvey(id: string, payload: SurveyPayload): Survey | null 
             order: index,
           })),
         }
-      : survey
+      : survey,
   )
   saveSurveys(nextSurveys)
   return nextSurveys.find((survey) => survey.id === id) ?? null
@@ -91,7 +91,11 @@ export function saveResponses(responses: ResponseRecord[]) {
   storageWrite(RESPONSES_KEY, responses)
 }
 
-export function submitSurveyResponse(surveyId: string, guestId: string, answers: Array<{ questionId: string; value: string }>) {
+export function submitSurveyResponse(
+  surveyId: string,
+  guestId: string,
+  answers: Array<{ questionId: string; value: string }>,
+) {
   const responses = loadResponses()
   const next = [...responses, { surveyId, guestId, answers, createdAt: new Date().toISOString() }]
   saveResponses(next)
@@ -103,7 +107,9 @@ export function getSurveyResponses(surveyId: string) {
 }
 
 export function hasSubmittedSurvey(surveyId: string, guestId: string) {
-  return loadResponses().some((response) => response.surveyId === surveyId && response.guestId === guestId)
+  return loadResponses().some(
+    (response) => response.surveyId === surveyId && response.guestId === guestId,
+  )
 }
 
 export function getGuestId() {

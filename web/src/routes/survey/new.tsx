@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { requireAuth } from '@/components/authenticatedRoutes'
+import { createSurvey } from '../../lib/api'
 import type { SurveyPayload } from '../../lib/types'
-import { createSurvey } from '../../lib/api';
-import { requireAuth } from "@/components/authenticatedRoutes";
 
 export const Route = createFileRoute('/survey/new')({
   beforeLoad: requireAuth,
@@ -13,7 +13,9 @@ export function CreateSurveyPage() {
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [coverImage, setCoverImage] = useState('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80')
+  const [coverImage, setCoverImage] = useState(
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+  )
   const [primaryColor, setPrimaryColor] = useState('#7c3aed')
   const [error, setError] = useState<string | null>(null)
 
@@ -21,7 +23,7 @@ export function CreateSurveyPage() {
     event.preventDefault()
     if (!title.trim()) {
       setError('A survey title is required.')
-      return;
+      return
     }
 
     const surveyPayload: SurveyPayload = {
@@ -31,7 +33,14 @@ export function CreateSurveyPage() {
       primaryColor,
       questions: [
         { id: 'q1', text: 'What is your name?', type: 'short_text', isRequired: true, order: 0 },
-        { id: 'q2', text: 'What feature would you use most?', type: 'multiple_choice', isRequired: true, order: 1, options: ['Branding', 'Questions', 'Response view'] },
+        {
+          id: 'q2',
+          text: 'What feature would you use most?',
+          type: 'multiple_choice',
+          isRequired: true,
+          order: 1,
+          options: ['Branding', 'Questions', 'Response view'],
+        },
         { id: 'q3', text: 'Rate this concept', type: 'rating', isRequired: true, order: 2 },
       ],
     }
@@ -47,9 +56,15 @@ export function CreateSurveyPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8 rounded-3xl border border-slate-800/80 bg-slate-900/40 p-6 sm:p-10 shadow-2xl backdrop-blur-md">
       <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-400">New Survey</p>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Give your survey a name and brand it.</h1>
-        <p className="text-slate-400 text-sm leading-relaxed">Start from a simple description, add a cover image and set a primary tone for the form.</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-400">
+          New Survey
+        </p>
+        <h1 className="text-3xl font-bold tracking-tight text-white">
+          Give your survey a name and brand it.
+        </h1>
+        <p className="text-slate-400 text-sm leading-relaxed">
+          Start from a simple description, add a cover image and set a primary tone for the form.
+        </p>
       </div>
 
       <form className="space-y-6" onSubmit={handleCreate}>
@@ -60,7 +75,9 @@ export function CreateSurveyPage() {
         ) : null}
 
         <label className="block space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Survey name</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Survey name
+          </span>
           <input
             type="text"
             value={title}
@@ -72,7 +89,9 @@ export function CreateSurveyPage() {
         </label>
 
         <label className="block space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Description</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Description
+          </span>
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
@@ -108,7 +127,9 @@ export function CreateSurveyPage() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Cover image URL</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Cover image URL
+            </span>
             <input
               type="url"
               value={coverImage}
@@ -119,7 +140,9 @@ export function CreateSurveyPage() {
           </label>
 
           <div className="space-y-2">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Primary color</span>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Primary color
+            </span>
             <div className="relative flex h-11 w-full items-center rounded-2xl border border-slate-800 bg-slate-950/60 px-3 transition-within focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10">
               <input
                 type="color"

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { useAuth } from '../hooks/useAuth'
 import { toast } from 'sonner'
+import { useAuth } from '../hooks/useAuth'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -19,8 +19,8 @@ function LoginPage() {
     setLoading(true)
 
     try {
-      await login({ email, password });
-      toast.success("Logged in successfully");
+      await login({ email, password })
+      toast.success('Logged in successfully')
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -30,7 +30,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      navigate({ to: "/dashboard" })
+      navigate({ to: '/dashboard' })
     }
   }, [user])
 

@@ -1,12 +1,10 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv'
 
-dotenv.config();
-
+dotenv.config()
 
 const credentialProvider = {
-    DATABASE_URL : process.env.DATABASE_URL!,
-    JWT_SECRET : process.env.JWT_SECRET!
+  DATABASE_URL: process.env.DATABASE_URL,
+  JWT_SECRET: process.env.JWT_SECRET,
 }
 
-
-export default credentialProvider;
+export default credentialProvider

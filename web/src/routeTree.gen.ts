@@ -9,14 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as SurveyNewRouteImport } from './routes/survey/new'
-import { Route as SurveyIdRouteImport } from './routes/survey/$id'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as PublicIdRouteImport } from './routes/public/$id'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SurveyIdRouteImport } from './routes/survey/$id'
 import { Route as SurveyIdResponsesRouteImport } from './routes/survey/$id/responses'
+import { Route as SurveyNewRouteImport } from './routes/survey/new'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -202,9 +202,7 @@ const SurveyIdRouteChildren: SurveyIdRouteChildren = {
   SurveyIdResponsesRoute: SurveyIdResponsesRoute,
 }
 
-const SurveyIdRouteWithChildren = SurveyIdRoute._addFileChildren(
-  SurveyIdRouteChildren,
-)
+const SurveyIdRouteWithChildren = SurveyIdRoute._addFileChildren(SurveyIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
