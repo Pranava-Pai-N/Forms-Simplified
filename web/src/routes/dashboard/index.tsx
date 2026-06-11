@@ -61,7 +61,7 @@ function DashboardPage() {
               params={{ id: survey.id }}
               className="rounded-full border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-500"
             >
-              Responses
+              View Responses
             </Link>
             <button
               type="button"

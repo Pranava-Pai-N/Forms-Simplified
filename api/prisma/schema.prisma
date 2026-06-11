@@ -14,28 +14,29 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String   
-  name      String
-  profileImage  String   @default("https://static.vecteezy.com/system/resources/previews/058/338/541/large_2x/blank-user-avatar-icon-in-hd-vector.jpg")
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String
+  name         String
+  profileImage String   @default("https://static.vecteezy.com/system/resources/previews/058/338/541/large_2x/blank-user-avatar-icon-in-hd-vector.jpg")
+  createdAt    DateTime @default(now())
 
   createdSurveys Survey[]       @relation("SurveyCreator")
   answers        SurveyAnswer[]
 }
 
 model Survey {
-  id          String     @id @default(uuid())
-  title       String
-  description String?
-  creatorId   String
-  createdAt   DateTime   @default(now())
-  coverImage  String
+  id            String     @id @default(uuid())
+  title         String
+  description   String?
+  creatorId     String
+  createdAt     DateTime   @default(now())
+  coverImage    String
   primaryColor  String
-  answeredCount  Int
-  creator     User       @relation("SurveyCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  questions   Question[]
+  isPublished   Boolean    @default(false)
+  answeredCount Int
+  creator       User       @relation("SurveyCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  questions     Question[]
 }
 
 model Question {
@@ -60,12 +61,12 @@ enum questionType {
 model SurveyAnswer {
   id         String   @id @default(uuid())
   questionId String
-  userId     String
+  userId     String?
   value      String
   createdAt  DateTime @default(now())
 
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([questionId, userId])
 }

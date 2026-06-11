@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     refresh()
-  }, [refresh])
+  }, [])
 
   const login = async (payload: { email: string; password: string }) => {
     await loginUser(payload)
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(
     () => ({ user, loading, login, signup, logout, refresh }),
-    [user, loading, login],
+    [user, loading, login, logout, signup],
   )
 
   return <AuthContext.Provider value={value}> {children} </AuthContext.Provider>

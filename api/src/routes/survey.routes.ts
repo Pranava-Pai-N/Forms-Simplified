@@ -9,6 +9,8 @@ type Bindings = {
 const surveyRoutes = new Hono<{ Bindings: Bindings }>()
 
 surveyRoutes.post('/', authMiddleware, surveyControllers.createSurvey)
+surveyRoutes.post('/:id/submit', surveyControllers.submitSurvey)
+surveyRoutes.get('/:id/responses', authMiddleware, surveyControllers.getSurveyResponses)
 surveyRoutes.get('/', authMiddleware, surveyControllers.getUserSurveys)
 surveyRoutes.get('/:id/responses', authMiddleware, surveyControllers.surveyResponsesbyId)
 surveyRoutes.get('/:id', surveyControllers.getSurveyById)

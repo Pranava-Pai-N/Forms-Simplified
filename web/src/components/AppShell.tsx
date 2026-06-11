@@ -16,7 +16,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-slate-950 text-white">
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-          <h1 className="text-lg font-semibold tracking-tight">FormSimplified</h1>
+          <Link to="/">
+            <h1 className="text-lg font-semibold tracking-tight">FormSimplified</h1>
+          </Link>
 
           <nav className="flex items-center gap-4 text-sm text-slate-300">
             <Link to="/" className="hover:text-white transition">

@@ -16,6 +16,7 @@ export type Survey = {
   coverImage: string
   primaryColor: string
   creatorId: string
+  isPublished: boolean
   createdAt: string
   questions: Question[]
 }

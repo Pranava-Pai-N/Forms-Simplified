@@ -9,14 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as PublicIdRouteImport } from './routes/public/$id'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SurveyIdRouteImport } from './routes/survey/$id'
-import { Route as SurveyIdResponsesRouteImport } from './routes/survey/$id/responses'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as SurveyNewRouteImport } from './routes/survey/new'
+import { Route as PublicIdRouteImport } from './routes/public/$id'
+import { Route as SurveyIdIndexRouteImport } from './routes/survey/$id.index'
+import { Route as SurveyIdResponsesRouteImport } from './routes/survey/$id.responses'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -43,20 +43,20 @@ const SurveyNewRoute = SurveyNewRouteImport.update({
   path: '/survey/new',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SurveyIdRoute = SurveyIdRouteImport.update({
-  id: '/survey/$id',
-  path: '/survey/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PublicIdRoute = PublicIdRouteImport.update({
   id: '/public/$id',
   path: '/public/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SurveyIdIndexRoute = SurveyIdIndexRouteImport.update({
+  id: '/survey/$id/',
+  path: '/survey/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SurveyIdResponsesRoute = SurveyIdResponsesRouteImport.update({
-  id: '/responses',
-  path: '/responses',
-  getParentRoute: () => SurveyIdRoute,
+  id: '/survey/$id/responses',
+  path: '/survey/$id/responses',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -64,20 +64,20 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/public/$id': typeof PublicIdRoute
-  '/survey/$id': typeof SurveyIdRouteWithChildren
   '/survey/new': typeof SurveyNewRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/survey/$id/responses': typeof SurveyIdResponsesRoute
+  '/survey/$id/': typeof SurveyIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/public/$id': typeof PublicIdRoute
-  '/survey/$id': typeof SurveyIdRouteWithChildren
   '/survey/new': typeof SurveyNewRoute
   '/dashboard': typeof DashboardIndexRoute
   '/survey/$id/responses': typeof SurveyIdResponsesRoute
+  '/survey/$id': typeof SurveyIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,10 +85,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/public/$id': typeof PublicIdRoute
-  '/survey/$id': typeof SurveyIdRouteWithChildren
   '/survey/new': typeof SurveyNewRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/survey/$id/responses': typeof SurveyIdResponsesRoute
+  '/survey/$id/': typeof SurveyIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,30 +97,30 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/public/$id'
-    | '/survey/$id'
     | '/survey/new'
     | '/dashboard/'
     | '/survey/$id/responses'
+    | '/survey/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/signup'
     | '/public/$id'
-    | '/survey/$id'
     | '/survey/new'
     | '/dashboard'
     | '/survey/$id/responses'
+    | '/survey/$id'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/signup'
     | '/public/$id'
-    | '/survey/$id'
     | '/survey/new'
     | '/dashboard/'
     | '/survey/$id/responses'
+    | '/survey/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,9 +128,10 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   PublicIdRoute: typeof PublicIdRoute
-  SurveyIdRoute: typeof SurveyIdRouteWithChildren
   SurveyNewRoute: typeof SurveyNewRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  SurveyIdResponsesRoute: typeof SurveyIdResponsesRoute
+  SurveyIdIndexRoute: typeof SurveyIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -170,13 +171,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SurveyNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/survey/$id': {
-      id: '/survey/$id'
-      path: '/survey/$id'
-      fullPath: '/survey/$id'
-      preLoaderRoute: typeof SurveyIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/public/$id': {
       id: '/public/$id'
       path: '/public/$id'
@@ -184,34 +178,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/survey/$id/': {
+      id: '/survey/$id/'
+      path: '/survey/$id'
+      fullPath: '/survey/$id/'
+      preLoaderRoute: typeof SurveyIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/survey/$id/responses': {
       id: '/survey/$id/responses'
-      path: '/responses'
+      path: '/survey/$id/responses'
       fullPath: '/survey/$id/responses'
       preLoaderRoute: typeof SurveyIdResponsesRouteImport
-      parentRoute: typeof SurveyIdRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface SurveyIdRouteChildren {
-  SurveyIdResponsesRoute: typeof SurveyIdResponsesRoute
-}
-
-const SurveyIdRouteChildren: SurveyIdRouteChildren = {
-  SurveyIdResponsesRoute: SurveyIdResponsesRoute,
-}
-
-const SurveyIdRouteWithChildren = SurveyIdRoute._addFileChildren(SurveyIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   PublicIdRoute: PublicIdRoute,
-  SurveyIdRoute: SurveyIdRouteWithChildren,
   SurveyNewRoute: SurveyNewRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  SurveyIdResponsesRoute: SurveyIdResponsesRoute,
+  SurveyIdIndexRoute: SurveyIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

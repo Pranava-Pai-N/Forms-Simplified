@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { getSurvey } from '../../lib/api'
+import { getSurvey, submitSurvey } from '../../lib/api'
 import { getGuestId, hasSubmittedSurvey, submitSurveyResponse } from '../../lib/storage'
 import type { Question, Survey } from '../../lib/types'
 
@@ -12,6 +12,7 @@ function PublicSurveyPage() {
   const { id } = Route.useParams() as { id: string }
   const [survey, setSurvey] = useState<Survey | null>(null)
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [notFound, setNotFound] = useState(false)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
@@ -84,26 +85,38 @@ function PublicSurveyPage() {
     return typeof answer === 'string' && answer.trim().length > 0
   })
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setError(null)
+    if (!survey || submitting) return
 
-    if (!survey) return
+    setError(null)
 
     if (!isValid) {
       setError('Please answer all required questions.')
       return
     }
 
-    submitSurveyResponse(
-      survey.id,
-      guestId,
-      survey.questions.map((question) => ({
+    setSubmitting(true)
+
+    const payload = {
+      answers: survey.questions.map((question) => ({
         questionId: question.id,
-        value: answers[question.id] ?? '',
+        value: (answers[question.id] ?? '').trim(),
       })),
-    )
-    setSubmitted(true)
+    }
+
+    try {
+      await submitSurvey(survey.id, payload)
+
+      submitSurveyResponse(survey.id, guestId, payload.answers)
+
+      setSubmitted(true)
+    } catch (err: any) {
+      console.error(err)
+      setError(err?.message ?? 'Failed to submit responses. Please check your network connection.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (alreadySubmitted || submitted) {
@@ -175,9 +188,10 @@ function PublicSurveyPage() {
             <div className="mt-5">
               {question.type === 'short_text' && (
                 <input
+                  disabled={submitting}
                   value={answers[question.id] ?? ''}
                   onChange={(event) => handleAnswerChange(question, event.target.value)}
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-indigo-500"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-indigo-500 disabled:opacity-50"
                   placeholder="Type your answer"
                 />
               )}
@@ -187,9 +201,10 @@ function PublicSurveyPage() {
                   {[1, 2, 3, 4, 5].map((value) => (
                     <button
                       key={value}
+                      disabled={submitting}
                       type="button"
                       onClick={() => handleAnswerChange(question, String(value))}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${answers[question.id] === String(value) ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${answers[question.id] === String(value) ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}
                     >
                       {value}
                     </button>
@@ -202,9 +217,10 @@ function PublicSurveyPage() {
                   {(question.options ?? []).map((option) => (
                     <button
                       key={option}
+                      disabled={submitting}
                       type="button"
                       onClick={() => handleAnswerChange(question, option)}
-                      className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition ${answers[question.id] === option ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}
+                      className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition disabled:opacity-50 ${answers[question.id] === option ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}
                     >
                       {option}
                     </button>
@@ -217,15 +233,12 @@ function PublicSurveyPage() {
 
         <button
           type="submit"
-          className="w-full rounded-2xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+          disabled={submitting}
+          className="w-full rounded-2xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:bg-indigo-500/50 disabled:cursor-not-allowed"
         >
-          Submit response
+          {submitting ? 'Submitting response...' : 'Submit response'}
         </button>
       </form>
-
-      <p className="text-center text-sm text-slate-500">
-        Your responses are saved locally in this browser.
-      </p>
     </div>
   )
 }

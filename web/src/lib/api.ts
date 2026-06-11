@@ -1,4 +1,4 @@
-import type { Survey, SurveyPayload, User } from './types'
+import type { Survey, SurveyPayload, User, Question } from './types'
 
 const apiFetch = async <T>(path: string, options: RequestInit = {}) => {
   const response = await fetch(`/api${path}`, {
@@ -59,3 +59,37 @@ export const getResponsesbySurveyId = (surveyId: string) =>
   apiFetch<{ success: boolean; survey: Survey; responseResult: any }>(
     `/survey/${surveyId}/responses`,
   )
+
+export const submitSurvey = (
+  surveyId: string,
+  payload: { answers: Array<{ questionId: string; value: string }> },
+) =>
+  apiFetch<{ success: boolean; message: string }>(`/survey/${surveyId}/submit`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+
+export const getSurveyResponses = (surveyId: string) =>
+  apiFetch<{
+    success: boolean
+    survey: Survey & {
+      questions: Array<
+        Question & {
+          answers: Array<{
+            id: string
+            userId: string | null
+            guestId: string | null
+            value: string
+            createdAt: string
+          }>
+        }
+      >
+    }
+    responseResult: Array<{
+      submissionId: string
+      isGuest: boolean
+      answers: Array<{ questionId: string; value: string }>
+    }>
+  }>(`/survey/${surveyId}/responses`, {
+    method: 'GET',
+  })

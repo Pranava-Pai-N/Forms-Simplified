@@ -9,7 +9,7 @@ export const Route = createFileRoute('/survey/new')({
   component: CreateSurveyPage,
 })
 
-export function CreateSurveyPage() {
+function CreateSurveyPage() {
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
