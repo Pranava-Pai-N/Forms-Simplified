@@ -7,14 +7,14 @@
   "minify": false,
   "observability": {
     "enabled": true
-  },
-  "hyperdrive": [
-    {
-      "binding": "HYPERDRIVE",
-      "id": "placeholder-id-for-local-dev",
-      "localConnectionString": "postgresql://pranava:mahamaya1980@localhost:5432/form-builder?schema=public"
-    }
-  ]
+  }
+  // "hyperdrive": [
+  //   {
+  //     "binding": "HYPERDRIVE",
+  //     "id": "placeholder-id-for-local-dev",
+  //     "localConnectionString": "postgresql://pranava:mahamaya1980@localhost:5432/form-builder?schema=public"
+  //   }
+  // ]
 
   // Add bindings here as you need them, then run `pnpm cf-typegen` to refresh `Env` types.
   //
