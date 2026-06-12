@@ -1,7 +1,7 @@
 import type { Question, Survey, SurveyAnswer, SurveyPayload, User } from './types'
 
 const apiFetch = async <T>(path: string, options: RequestInit = {}) => {
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api${path}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
