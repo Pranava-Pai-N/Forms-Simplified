@@ -1,4 +1,3 @@
-import type { Hyperdrive } from '@cloudflare/workers-types'
 import bcrypt from 'bcryptjs'
 import type { Context } from 'hono'
 import { setCookie } from 'hono/cookie'
@@ -18,7 +17,7 @@ type AppEnv = {
     user: UserContext
   }
   Bindings: {
-    HYPERDRIVE: Hyperdrive
+    DATABASE_URL: string
   }
 }
 
@@ -61,7 +60,7 @@ const registerUser = async (content: Context<AppEnv>) => {
     )
   }
 
-  const prisma = connectDB(content.env.HYPERDRIVE)
+  const prisma = connectDB(content.env.DATABASE_URL)
 
   const exisitingUser = await prisma.user.findFirst({
     where: {
@@ -140,7 +139,7 @@ const loginUser = async (content: Context<AppEnv>) => {
     )
   }
 
-  const prisma = connectDB(content.env.HYPERDRIVE)
+  const prisma = connectDB(content.env.DATABASE_URL)
 
   const existingUser = await prisma.user.findFirst({
     where: {
@@ -204,7 +203,7 @@ const getMe = async (content: Context<AppEnv>) => {
   const userToken = content.get('user')
   const id = userToken.id
 
-  const prisma = connectDB(content.env.HYPERDRIVE)
+  const prisma = connectDB(content.env.DATABASE_URL)
 
   const user = await prisma.user.findFirst({
     where: {

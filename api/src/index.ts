@@ -1,26 +1,22 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import mainRoute from './routes/index.routes'
-import dotenv from "dotenv"
 
-type Bindings = {
+type Env = {
   Bindings: {
-    HYPERDRIVE: {
-      connectionString: string
-    }
     DATABASE_URL: string
     FRONTEND_URL: string
   }
 }
-dotenv.config();
 
-const app = new Hono<{ Bindings: Bindings }>()
-
+const app = new Hono<Env>()
 
 app.use('/api/*', async (c, next) => {
+  const FRONTEND_URL = c.env.FRONTEND_URL || ''
+
   const corsMiddleware = cors({
-    origin: [c.env.Bindings.FRONTEND_URL],
-    credentials: true
+    origin: [FRONTEND_URL],
+    credentials: true,
   })
   return corsMiddleware(c, next)
 })

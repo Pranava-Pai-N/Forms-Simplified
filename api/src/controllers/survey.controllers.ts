@@ -1,4 +1,3 @@
-import type { Hyperdrive } from '@cloudflare/workers-types'
 import type { Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { nanoid } from 'nanoid'
@@ -44,7 +43,7 @@ type AppEnv = {
     user: UserContext
   }
   Bindings: {
-    HYPERDRIVE: Hyperdrive
+    DATABASE_URL: string
   }
 }
 
@@ -84,7 +83,7 @@ const createSurvey = async (content: Context<AppEnv>) => {
       )
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE)
+    const prisma = connectDB(content.env.DATABASE_URL)
 
     const survey = await prisma.survey.create({
       data: {
@@ -132,7 +131,7 @@ const getUserSurveys = async (content: Context<AppEnv>) => {
   try {
     const user = content.get('user')
     const id = user.id
-    const prisma = connectDB(content.env.HYPERDRIVE)
+    const prisma = connectDB(content.env.DATABASE_URL)
 
     const userSurveys = await prisma.user.findUnique({
       where: { id },
@@ -176,7 +175,7 @@ const getSurveyById = async (content: Context<AppEnv>) => {
       )
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE)
+    const prisma = connectDB(content.env.DATABASE_URL)
 
     const survey = await prisma.survey.findUnique({
       where: { id: surveyId },
@@ -240,7 +239,7 @@ const updateSurvey = async (content: Context<AppEnv>) => {
       )
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE)
+    const prisma = connectDB(content.env.DATABASE_URL)
 
     const existingSurvey = await prisma.survey.findUnique({
       where: { id: surveyId },
@@ -331,7 +330,7 @@ const surveyResponsesbyId = async (content: Context<AppEnv>) => {
       400,
     )
   }
-  const prisma = connectDB(content.env.HYPERDRIVE)
+  const prisma = connectDB(content.env.DATABASE_URL)
 
   try {
     const survey = await prisma.survey.findUnique({
@@ -448,7 +447,7 @@ const submitSurvey = async (content: Context<AppEnv>) => {
       return content.json({ success: false, message: 'Please provide valid survey answers.' }, 400)
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE)
+    const prisma = connectDB(content.env.DATABASE_URL)
 
     const survey = await prisma.survey.findUnique({
       where: { id: surveyId },
@@ -583,7 +582,7 @@ const getSurveyResponses = async (content: Context<AppEnv>) => {
       return content.json({ success: false, message: 'Please provide a valid survey id.' }, 400)
     }
 
-    const prisma = connectDB(content.env.HYPERDRIVE)
+    const prisma = connectDB(content.env.DATABASE_URL)
 
     const survey = await prisma.survey.findFirst({
       where: {
