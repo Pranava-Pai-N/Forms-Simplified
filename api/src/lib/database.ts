@@ -1,8 +1,9 @@
+import type { Hyperdrive } from '@cloudflare/workers-types'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 import { PrismaClient } from '../generated/prisma'
 
-export function connectDB(hyperdriveBinding: any) {
+export function connectDB(hyperdriveBinding: Hyperdrive): PrismaClient {
   if (!hyperdriveBinding?.connectionString) {
     throw new Error('Cloudflare Hyperdrive binding is missing or misconfigured.')
   }

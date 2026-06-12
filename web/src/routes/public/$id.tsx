@@ -111,9 +111,13 @@ function PublicSurveyPage() {
       submitSurveyResponse(survey.id, guestId, payload.answers)
 
       setSubmitted(true)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err)
-      setError(err?.message ?? 'Failed to submit responses. Please check your network connection.')
+      if (err instanceof Error) {
+        setError(err?.message)
+      } else {
+        setError('Failed to submit responses. Please check your network connection.')
+      }
     } finally {
       setSubmitting(false)
     }

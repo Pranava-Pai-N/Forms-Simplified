@@ -21,8 +21,12 @@ function LoginPage() {
     try {
       await login({ email, password })
       toast.success('Logged in successfully')
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     } finally {
       setLoading(false)
     }
@@ -32,7 +36,7 @@ function LoginPage() {
     if (user) {
       navigate({ to: '/dashboard' })
     }
-  }, [user])
+  }, [user, navigate])
 
   return (
     <div className="mx-auto max-w-lg space-y-6 rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-2xl shadow-slate-950/20">

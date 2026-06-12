@@ -1,8 +1,25 @@
+import type { Hyperdrive } from '@cloudflare/workers-types'
+import type { Context, Next } from 'hono'
 import { getCookie } from 'hono/cookie'
 import jwt from 'jsonwebtoken'
 import credentialProvider from '../env'
 
-const authMiddleware = async (content: any, next: any) => {
+type UserContext = {
+  id: string
+  email?: string
+  name?: string
+}
+
+type AppEnv = {
+  Variables: {
+    user: UserContext
+  }
+  Bindings: {
+    HYPERDRIVE: Hyperdrive
+  }
+}
+
+const authMiddleware = async (content: Context<AppEnv>, next: Next) => {
   try {
     const token = getCookie(content, 'token')
 
@@ -33,7 +50,7 @@ const authMiddleware = async (content: any, next: any) => {
 
     content.set('user', decodedToken)
     await next()
-  } catch (_error: any) {
+  } catch (_error) {
     console.log('Error finding the user. Please try again later ..')
 
     return content.json(

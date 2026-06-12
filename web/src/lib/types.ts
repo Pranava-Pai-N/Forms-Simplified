@@ -6,7 +6,7 @@ export type Question = {
   type: QuestionType
   isRequired: boolean
   order: number
-  options?: string[]
+  options?: string[] | null
 }
 
 export type Survey = {
@@ -17,6 +17,7 @@ export type Survey = {
   primaryColor: string
   creatorId: string
   isPublished: boolean
+  answeredCount: number
   createdAt: string
   questions: Question[]
 }
@@ -29,6 +30,14 @@ export type SurveyPayload = {
   questions: Question[]
 }
 
+export type SurveyAnswer = {
+  id: string
+  questionId: string
+  userId: string | null
+  value: string
+  createdAt: Date
+}
+
 export type User = {
   id: string
   name: string
@@ -36,5 +45,5 @@ export type User = {
   profileImage: string
   createdAt: Date
   createdSurveys: Survey[]
-  answers: SurveyPayload[]
+  answers: SurveyAnswer[]
 }

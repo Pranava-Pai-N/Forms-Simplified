@@ -1,4 +1,4 @@
-import type { Survey, SurveyPayload, User, Question } from './types'
+import type { Question, Survey, SurveyAnswer, SurveyPayload, User } from './types'
 
 const apiFetch = async <T>(path: string, options: RequestInit = {}) => {
   const response = await fetch(`/api${path}`, {
@@ -56,7 +56,7 @@ export const updateSurvey = (surveyId: string, payload: SurveyPayload) =>
   })
 
 export const getResponsesbySurveyId = (surveyId: string) =>
-  apiFetch<{ success: boolean; survey: Survey; responseResult: any }>(
+  apiFetch<{ success: boolean; survey: Survey; responseResult: SurveyAnswer }>(
     `/survey/${surveyId}/responses`,
   )
 

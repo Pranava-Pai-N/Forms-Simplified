@@ -5,7 +5,7 @@ import { getSurveyResponses } from '../../lib/api'
 import type { Question } from '../../lib/types'
 
 export const Route = createFileRoute('/survey/$id/responses')({
-  beforeLoad: requireAuth,
+  beforeLoad: requireAuth as (opts: unknown) => Promise<void>,
   component: SurveyResponsesPage,
 })
 

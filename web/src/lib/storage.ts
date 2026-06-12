@@ -1,12 +1,14 @@
-import type { Question, Survey, SurveyPayload } from './types'
+import type { Survey, SurveyPayload } from './types'
 
 const SURVEYS_KEY = 'formflow.surveys'
 const RESPONSES_KEY = 'formflow.responses'
 
 function storageRead<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback
+
   try {
     const stored = window.localStorage.getItem(key)
+
     return stored ? (JSON.parse(stored) as T) : fallback
   } catch {
     return fallback
@@ -38,6 +40,8 @@ export function createSurvey(payload: SurveyPayload): Survey {
     coverImage: payload.coverImage,
     primaryColor: payload.primaryColor,
     creatorId: 'local-user',
+    isPublished: false,
+    answeredCount: 0,
     createdAt: new Date().toISOString(),
     questions: payload.questions.map((question, index) => ({
       ...question,

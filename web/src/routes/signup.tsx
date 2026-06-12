@@ -25,8 +25,12 @@ function SignupPage() {
       await signup({ name, email, password })
       toast.success('Please login with the credentials ...')
       navigate({ to: '/login' })
-    } catch (error: any) {
-      setMessage(error.message ?? 'Signup failed')
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setMessage(error.message)
+      } else {
+        setMessage('Signup failed')
+      }
     } finally {
       setLoading(false)
     }

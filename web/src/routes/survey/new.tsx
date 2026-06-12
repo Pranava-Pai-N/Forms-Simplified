@@ -5,7 +5,7 @@ import { createSurvey } from '../../lib/api'
 import type { SurveyPayload } from '../../lib/types'
 
 export const Route = createFileRoute('/survey/new')({
-  beforeLoad: requireAuth,
+  beforeLoad: requireAuth as (opts: unknown) => Promise<void>,
   component: CreateSurveyPage,
 })
 
@@ -48,8 +48,12 @@ function CreateSurveyPage() {
     try {
       const response = await createSurvey(surveyPayload)
       navigate({ to: `/survey/${response.survey.id}` })
-    } catch (error: any) {
-      setError(error?.message ?? 'Unable to create survey. Please try again.')
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error?.message)
+      } else {
+        setError('Unable to create survey. Please try again.')
+      }
     }
   }
 

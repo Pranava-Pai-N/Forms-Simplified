@@ -4,14 +4,17 @@ import { toast } from 'sonner'
 import { requireAuth } from '@/components/authenticatedRoutes'
 import { getUserSurveys } from '../../lib/api'
 import type { Survey } from '../../lib/types'
+import qrcode from 'qrcode'
 
 export const Route = createFileRoute('/dashboard/')({
   component: DashboardPage,
-  beforeLoad: requireAuth,
+  beforeLoad: requireAuth as (opts: unknown) => Promise<void>,
 })
 
 function DashboardPage() {
   const [surveys, setSurveys] = useState<Survey[]>([])
+  const [activeQRForm, setActiveQRForm] = useState<Survey | null>(null)
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('')
 
   useEffect(() => {
     const load = async () => {
@@ -25,6 +28,20 @@ function DashboardPage() {
 
     load()
   }, [])
+
+  useEffect(() => {
+    if (!activeQRForm) {
+      setQrCodeDataUrl('')
+      return
+    }
+
+    const url = `${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.id}`
+
+    qrcode
+      .toDataURL(url, { width: 250, margin: 2 })
+      .then(setQrCodeDataUrl)
+      .catch(() => toast.error('Failed to generate QR code'))
+  }, [activeQRForm])
 
   const activeCount = surveys.length
 
@@ -65,7 +82,7 @@ function DashboardPage() {
             </Link>
             <button
               type="button"
-              className="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200"
+              className="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 transition"
               onClick={() => {
                 navigator.clipboard.writeText(
                   `${import.meta.env.VITE_FRONTEND_URL}/public/${survey.id}`,
@@ -75,6 +92,16 @@ function DashboardPage() {
             >
               Copy public link
             </button>
+
+            <button
+              type="button"
+              className="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 transition"
+              onClick={() => {
+                setActiveQRForm(survey)
+              }}
+            >
+              Share QR Code
+            </button>
           </div>
         </div>
       )),
@@ -83,6 +110,66 @@ function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {activeQRForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl transition-all text-center">
+            <h3 className="text-xl font-semibold text-white">Share QR Code</h3>
+            <p className="mt-1 text-sm text-slate-400 truncate px-4">
+              Form Name: {activeQRForm.title}
+            </p>
+
+            <div className="mt-4 mx-2 flex items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-950/60 p-2.5 pl-4 text-left">
+              <span className="truncate text-xs font-mono text-slate-400 selection:bg-indigo-500/30 selection:text-white">
+                {`${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.id}`}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    `${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.id}`,
+                  )
+                  toast.success('Link copied to clipboard!')
+                }}
+                className="shrink-0 rounded-xl bg-slate-800 px-3 py-1.5 text-xs font-semibold text-indigo-400 hover:bg-slate-700 hover:text-indigo-300 transition"
+              >
+                Copy
+              </button>
+            </div>
+
+            <div className="my-6 flex justify-center">
+              {qrCodeDataUrl ? (
+                <div className="rounded-2xl bg-white p-3 shadow-md">
+                  <img src={qrCodeDataUrl} alt="Survey QR Code" className="w-50 h-50" />
+                </div>
+              ) : (
+                <div className="w-56 h-56 flex items-center justify-center text-sm text-slate-500">
+                  Generating...
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {qrCodeDataUrl && (
+                <a
+                  href={qrCodeDataUrl}
+                  download={`${activeQRForm.title.toLowerCase().replace(/\s+/g, '-')}-qr.png`}
+                  className="w-full py-2.5 rounded-xl bg-indigo-500 text-sm font-semibold text-white hover:bg-indigo-400 transition block text-center"
+                >
+                  Download Image
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setActiveQRForm(null)}
+                className="w-full py-2.5 rounded-xl border border-slate-700 bg-transparent text-sm font-medium text-slate-300 hover:bg-slate-800 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl shadow-slate-950/20">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>

@@ -1,13 +1,55 @@
+import type { Hyperdrive } from '@cloudflare/workers-types'
 import bcrypt from 'bcryptjs'
+import type { Context } from 'hono'
 import { setCookie } from 'hono/cookie'
 import jwt from 'jsonwebtoken'
 import credentialProvider from '../env'
 import { connectDB } from '../lib/database'
+import { loginSchema, registerSchema } from '../utils/validations/authValidations'
 
-const registerUser = async (content: any) => {
-  const body = await content.req.json()
+type UserContext = {
+  id: string
+  email?: string
+  name?: string
+}
 
-  const { name, email, password } = body
+type AppEnv = {
+  Variables: {
+    user: UserContext
+  }
+  Bindings: {
+    HYPERDRIVE: Hyperdrive
+  }
+}
+
+interface registerUser {
+  name: string
+  email: string
+  password: string
+}
+
+interface loginUser {
+  email: string
+  password: string
+}
+
+const registerUser = async (content: Context<AppEnv>) => {
+  const body = await content.req.json<registerUser>()
+
+  const result = registerSchema.safeParse(body)
+
+  if (!result.success) {
+    return content.json(
+      {
+        success: false,
+        message: `Please provide valid details : Name of 3 characters (min) and password of 6 characters (min)`,
+        errors: result.error.flatten().fieldErrors,
+      },
+      400,
+    )
+  }
+
+  const { name, email, password } = result.data
 
   if (!name || !email || !password) {
     return content.json(
@@ -70,10 +112,23 @@ const registerUser = async (content: any) => {
   )
 }
 
-const loginUser = async (content: any) => {
-  const body = await content.req.json()
+const loginUser = async (content: Context<AppEnv>) => {
+  const body = await content.req.json<loginUser>()
 
-  const { email, password } = body
+  const result = loginSchema.safeParse(body)
+
+  if (!result.success) {
+    return content.json(
+      {
+        success: false,
+        message: 'Validation failed',
+        errors: result.error.flatten().fieldErrors,
+      },
+      400,
+    )
+  }
+
+  const { email, password } = result.data
 
   if (!email || !password) {
     return content.json(
@@ -145,7 +200,7 @@ const loginUser = async (content: any) => {
   )
 }
 
-const getMe = async (content: any) => {
+const getMe = async (content: Context<AppEnv>) => {
   const userToken = content.get('user')
   const id = userToken.id
 
@@ -175,7 +230,7 @@ const getMe = async (content: any) => {
   )
 }
 
-const logoutUser = async (content: any) => {
+const logoutUser = async (content: Context<AppEnv>) => {
   setCookie(content, 'token', '', {
     httpOnly: true,
     secure: false,

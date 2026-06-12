@@ -1,10 +1,68 @@
+import type { Hyperdrive } from '@cloudflare/workers-types'
+import type { Context } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 import { nanoid } from 'nanoid'
+import type { Prisma } from '../generated/prisma'
 import { connectDB } from '../lib/database'
 
-const createSurvey = async (content: any) => {
+interface SurveyQuestionInput {
+  id?: string
+  text: string
+  type: Prisma.QuestionCreateInput['type']
+  isRequired?: boolean
+  order?: number
+  options?: string[]
+}
+
+interface CreateSurveyBody {
+  title: string
+  description?: string
+  coverImage: string
+  primaryColor: string
+  questions: SurveyQuestionInput[]
+}
+
+interface UpdateSurveyBody extends Partial<CreateSurveyBody> {
+  isPublished?: boolean
+}
+
+interface SubmitSurveyBody {
+  answers: Array<{
+    questionId: string
+    value: string | number | boolean
+  }>
+}
+
+type UserContext = {
+  id: string
+  email?: string
+  name?: string
+}
+
+type AppEnv = {
+  Variables: {
+    user: UserContext
+  }
+  Bindings: {
+    HYPERDRIVE: Hyperdrive
+  }
+}
+
+interface AggregatedAnswer {
+  questionId: string
+  question: string
+  type: string
+  value: string
+}
+
+interface AggregatedUserResponse {
+  user: { id: string; email: string; name: string } | null
+  answers: AggregatedAnswer[]
+}
+
+const createSurvey = async (content: Context<AppEnv>) => {
   try {
-    const body = await content.req.json()
+    const body = await content.req.json<CreateSurveyBody>()
 
     const user = content.get('user')
 
@@ -40,7 +98,7 @@ const createSurvey = async (content: any) => {
           connect: { id: user.id },
         },
         questions: {
-          create: questions.map((question: any, index: number) => ({
+          create: questions.map((question, index) => ({
             id: question.id,
             text: question.text,
             type: question.type,
@@ -70,7 +128,7 @@ const createSurvey = async (content: any) => {
   }
 }
 
-const getUserSurveys = async (content: any) => {
+const getUserSurveys = async (content: Context<AppEnv>) => {
   try {
     const user = content.get('user')
     const id = user.id
@@ -104,7 +162,7 @@ const getUserSurveys = async (content: any) => {
   }
 }
 
-const getSurveyById = async (content: any) => {
+const getSurveyById = async (content: Context<AppEnv>) => {
   try {
     const surveyId = content.req.param('id')
 
@@ -152,13 +210,13 @@ const getSurveyById = async (content: any) => {
   }
 }
 
-const updateSurvey = async (content: any) => {
+const updateSurvey = async (content: Context<AppEnv>) => {
   try {
     const surveyId = content.req.param('id')
 
     const user = content.get('user')
 
-    const body = await content.req.json()
+    const body = await content.req.json<UpdateSurveyBody>()
 
     if (!surveyId) {
       return content.json(
@@ -228,7 +286,7 @@ const updateSurvey = async (content: any) => {
         ...(isPublished !== undefined ? { isPublished: !!isPublished } : {}),
         questions: {
           deleteMany: {},
-          create: questions.map((question: any, index: number) => {
+          create: questions.map((question, index) => {
             const rawOptions = Array.isArray(question.options) ? question.options : []
 
             return {
@@ -261,7 +319,7 @@ const updateSurvey = async (content: any) => {
   }
 }
 
-const surveyResponsesbyId = async (content: any) => {
+const surveyResponsesbyId = async (content: Context<AppEnv>) => {
   const surveyId = content.req.param('id')
 
   if (!surveyId) {
@@ -280,7 +338,6 @@ const surveyResponsesbyId = async (content: any) => {
       where: {
         id: surveyId,
       },
-
       include: {
         questions: {
           orderBy: { order: 'asc' },
@@ -311,11 +368,11 @@ const surveyResponsesbyId = async (content: any) => {
       )
     }
 
-    const responses: Record<string, any> = {}
+    const responses: Record<string, AggregatedUserResponse> = {}
 
     survey.questions.forEach((question) => {
       question.answers.forEach((ans) => {
-        const userId = ans?.user?.id as string
+        const userId = (ans?.user?.id as string) || 'anonymous'
 
         if (!responses[userId]) {
           responses[userId] = {
@@ -355,10 +412,10 @@ const surveyResponsesbyId = async (content: any) => {
   }
 }
 
-const submitSurvey = async (content: any) => {
+const submitSurvey = async (content: Context<AppEnv>) => {
   try {
     const surveyId = content.req.param('id')
-    const body = await content.req.json()
+    const body = await content.req.json<SubmitSurveyBody>()
 
     if (!surveyId) {
       return content.json({ success: false, message: 'Please provide a valid survey id.' }, 400)
@@ -367,7 +424,7 @@ const submitSurvey = async (content: any) => {
     const authUser = content.get('user')
     const dbUserId = authUser?.id || null
 
-    let trackerId = authUser?.id
+    let trackerId: string | undefined = authUser?.id
 
     if (!trackerId) {
       trackerId = getCookie(content, 'guest_session_id')
@@ -414,9 +471,7 @@ const submitSurvey = async (content: any) => {
 
     const targetQuestionIds = new Set(survey.questions.map((q) => q.id))
 
-    const requiredQuestionIds = survey.questions
-      .filter((q: any) => q.isRequired)
-      .map((q: any) => q.id)
+    const requiredQuestionIds = survey.questions.filter((q) => q.isRequired).map((q) => q.id)
 
     const uniqueAnswersMap = new Map<string, string>()
 
@@ -428,7 +483,7 @@ const submitSurvey = async (content: any) => {
       }
     }
 
-    const missingRequired = requiredQuestionIds.some((id: any) => {
+    const missingRequired = requiredQuestionIds.some((id) => {
       const val = uniqueAnswersMap.get(id)
       return !val || val.length === 0
     })
@@ -450,7 +505,7 @@ const submitSurvey = async (content: any) => {
       },
     })
 
-    const operations = []
+    const operations: Prisma.PrismaPromise<unknown>[] = []
 
     for (const [questionId, rawValue] of uniqueAnswersMap.entries()) {
       if (dbUserId) {
@@ -519,7 +574,7 @@ const submitSurvey = async (content: any) => {
   }
 }
 
-const getSurveyResponses = async (content: any) => {
+const getSurveyResponses = async (content: Context<AppEnv>) => {
   try {
     const surveyId = content.req.param('id')
     const userId = content.get('user').id
@@ -592,7 +647,7 @@ const getSurveyResponses = async (content: any) => {
           submissionsMap.set(key, [])
         }
 
-        submissionsMap.get(key)!.push({
+        submissionsMap.get(key)?.push({
           questionId: q.id,
           value: ans.value,
         })

@@ -5,7 +5,7 @@ import { getSurvey, updateSurvey } from '../../lib/api'
 import type { Question, QuestionType, Survey, SurveyPayload } from '../../lib/types'
 
 export const Route = createFileRoute('/survey/$id/')({
-  beforeLoad: requireAuth,
+  beforeLoad: requireAuth as (opts: unknown) => Promise<void>,
   component: SurveyEditorPage,
 })
 
@@ -201,8 +201,12 @@ function SurveyEditorPage() {
       const response = await updateSurvey(id, preparePayload())
       setSurvey(response.survey)
       setMessage('Survey saved successfully.')
-    } catch (error: any) {
-      setMessage(error?.message ?? 'Unable to save survey. Please try again.')
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setMessage(error.message)
+      } else {
+        setMessage('Unable to save survey. Please try again.')
+      }
     }
   }
 
@@ -224,12 +228,16 @@ function SurveyEditorPage() {
       const response = await updateSurvey(id, {
         ...preparePayload(),
         isPublished: true,
-      } as any)
+      } as unknown as SurveyPayload)
 
       setSurvey(response.survey)
       setMessage('Survey has been published and locked successfully.')
-    } catch (error: any) {
-      setMessage(error?.message ?? 'Unable to publish survey. Please try again.')
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setMessage(error?.message)
+      } else {
+        setMessage('Unable to publish survey. Please try again.')
+      }
     } finally {
       setIsPublishing(false)
     }
@@ -299,7 +307,7 @@ function SurveyEditorPage() {
         </div>
       </div>
 
-      <form className="grid gap-8 lg:grid-cols-[1.5fr_1fr]" onSubmit={handleSave}>
+      <form className="space-y-8" onSubmit={handleSave}>
         <div className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-xl shadow-slate-950/10">
           {message ? (
             <p className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
@@ -322,7 +330,7 @@ function SurveyEditorPage() {
                 value={description}
                 disabled={isReadOnly}
                 onChange={(event) => setDescription(event.target.value)}
-                rows={4}
+                rows={3}
                 className="mt-2 w-full rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-indigo-500 disabled:opacity-50"
               />
             </label>
@@ -350,7 +358,7 @@ function SurveyEditorPage() {
           </div>
 
           {!isReadOnly ? (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex justify-end gap-4 max-w-md ml-auto">
               <button
                 type="submit"
                 className="w-full rounded-2xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
@@ -373,11 +381,11 @@ function SurveyEditorPage() {
           )}
         </div>
 
-        <div className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-xl shadow-slate-950/10">
-          <div className="flex items-center justify-between gap-4">
+        <div className="max-w-4xl mx-auto space-y-6 rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-xl shadow-slate-950/10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Questions</p>
-              <p className="mt-2 text-slate-400">Manage and layout options below.</p>
+              <p className="mt-1 text-sm text-slate-400">Manage and layout options below.</p>
             </div>
             {!isReadOnly && (
               <div className="flex flex-wrap gap-2">
