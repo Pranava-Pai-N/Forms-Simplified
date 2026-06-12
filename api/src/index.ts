@@ -6,6 +6,7 @@ type Bindings = {
     HYPERDRIVE: {
       connectionString: string
     }
+    DATABASE_URL: string
   }
 }
 
