@@ -291,7 +291,7 @@ function SurveyEditorPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/public/$id"
-              params={{ id: survey.id }}
+              params={{ id: survey.shortId }}
               className="rounded-full bg-slate-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
             >
               View public form

@@ -35,7 +35,7 @@ function DashboardPage() {
       return
     }
 
-    const url = `${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.id}`
+    const url = `${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.shortId}`
 
     qrcode
       .toDataURL(url, { width: 250, margin: 2 })
@@ -68,14 +68,14 @@ function DashboardPage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               to="/survey/$id"
-              params={{ id: survey.id }}
+              params={{ id: survey.shortId }}
               className="rounded-full bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400"
             >
               Edit
             </Link>
             <Link
               to="/survey/$id/responses"
-              params={{ id: survey.id }}
+              params={{ id: survey.shortId }}
               className="rounded-full border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-500"
             >
               View Responses
@@ -85,7 +85,7 @@ function DashboardPage() {
               className="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 transition"
               onClick={() => {
                 navigator.clipboard.writeText(
-                  `${import.meta.env.VITE_FRONTEND_URL}/public/${survey.id}`,
+                  `${import.meta.env.VITE_FRONTEND_URL}/public/${survey.shortId}`,
                 )
                 toast.success('Copied to clipboard successfully ...')
               }}
@@ -120,13 +120,13 @@ function DashboardPage() {
 
             <div className="mt-4 mx-2 flex items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-950/60 p-2.5 pl-4 text-left">
               <span className="truncate text-xs font-mono text-slate-400 selection:bg-indigo-500/30 selection:text-white">
-                {`${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.id}`}
+                {`${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.shortId}`}
               </span>
               <button
                 type="button"
                 onClick={() => {
                   navigator.clipboard.writeText(
-                    `${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.id}`,
+                    `${import.meta.env.VITE_FRONTEND_URL}/public/${activeQRForm.shortId}`,
                   )
                   toast.success('Link copied to clipboard!')
                 }}

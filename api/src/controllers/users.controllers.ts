@@ -179,10 +179,10 @@ const loginUser = async (content: Context<AppEnv>) => {
   const cookieOptions = {
     httpOnly: true,
     secure: credentialProvider.NODE_ENV === 'production',
-    sameSite: 'none' as const,
+    sameSite: credentialProvider.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 60 * 60,
     path: '/',
-  }
+  } as const;
 
   setCookie(content, 'token', token, cookieOptions)
 
@@ -233,7 +233,7 @@ const logoutUser = async (content: Context<AppEnv>) => {
   setCookie(content, 'token', '', {
     httpOnly: true,
     secure: credentialProvider.NODE_ENV === 'production',
-    sameSite: 'none',
+    sameSite: credentialProvider.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 0,
     path: '/',
   })

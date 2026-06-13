@@ -3,6 +3,7 @@ import { getCookie, setCookie } from 'hono/cookie'
 import { nanoid } from 'nanoid'
 import type { Prisma } from '../generated/prisma'
 import { connectDB } from '../lib/database'
+import credentialProvider from '../env'
 
 interface SurveyQuestionInput {
   id?: string
@@ -93,6 +94,7 @@ const createSurvey = async (content: Context<AppEnv>) => {
         primaryColor,
         isPublished: false,
         answeredCount: 0,
+        shortId: nanoid(6),
         creator: {
           connect: { id: user.id },
         },
@@ -163,9 +165,9 @@ const getUserSurveys = async (content: Context<AppEnv>) => {
 
 const getSurveyById = async (content: Context<AppEnv>) => {
   try {
-    const surveyId = content.req.param('id')
+    const surveyIdOrShortId = content.req.param('id')
 
-    if (!surveyId) {
+    if (!surveyIdOrShortId) {
       return content.json(
         {
           success: false,
@@ -177,8 +179,10 @@ const getSurveyById = async (content: Context<AppEnv>) => {
 
     const prisma = connectDB(content.env.DATABASE_URL)
 
-    const survey = await prisma.survey.findUnique({
-      where: { id: surveyId },
+    const survey = await prisma.survey.findFirst({
+      where: {
+        OR: [{ id: surveyIdOrShortId }, { shortId: surveyIdOrShortId }],
+      },
       include: {
         questions: {
           orderBy: { order: 'asc' },
@@ -211,13 +215,13 @@ const getSurveyById = async (content: Context<AppEnv>) => {
 
 const updateSurvey = async (content: Context<AppEnv>) => {
   try {
-    const surveyId = content.req.param('id')
+    const surveyIdOrShortId = content.req.param('id')
 
     const user = content.get('user')
 
     const body = await content.req.json<UpdateSurveyBody>()
 
-    if (!surveyId) {
+    if (!surveyIdOrShortId) {
       return content.json(
         {
           success: false,
@@ -241,8 +245,10 @@ const updateSurvey = async (content: Context<AppEnv>) => {
 
     const prisma = connectDB(content.env.DATABASE_URL)
 
-    const existingSurvey = await prisma.survey.findUnique({
-      where: { id: surveyId },
+    const existingSurvey = await prisma.survey.findFirst({
+      where: {
+        OR: [{ id: surveyIdOrShortId }, { shortId: surveyIdOrShortId }],
+      },
     })
 
     if (!existingSurvey) {
@@ -276,7 +282,7 @@ const updateSurvey = async (content: Context<AppEnv>) => {
     }
 
     const survey = await prisma.survey.update({
-      where: { id: surveyId },
+      where: { id: existingSurvey.id },
       data: {
         title,
         description,
@@ -319,9 +325,9 @@ const updateSurvey = async (content: Context<AppEnv>) => {
 }
 
 const surveyResponsesbyId = async (content: Context<AppEnv>) => {
-  const surveyId = content.req.param('id')
+  const surveyIdOrShortId = content.req.param('id')
 
-  if (!surveyId) {
+  if (!surveyIdOrShortId) {
     return content.json(
       {
         success: false,
@@ -333,9 +339,9 @@ const surveyResponsesbyId = async (content: Context<AppEnv>) => {
   const prisma = connectDB(content.env.DATABASE_URL)
 
   try {
-    const survey = await prisma.survey.findUnique({
+    const survey = await prisma.survey.findFirst({
       where: {
-        id: surveyId,
+        OR: [{ id: surveyIdOrShortId }, { shortId: surveyIdOrShortId }],
       },
       include: {
         questions: {
@@ -413,10 +419,10 @@ const surveyResponsesbyId = async (content: Context<AppEnv>) => {
 
 const submitSurvey = async (content: Context<AppEnv>) => {
   try {
-    const surveyId = content.req.param('id')
+    const surveyIdOrShortId = content.req.param('id')
     const body = await content.req.json<SubmitSurveyBody>()
 
-    if (!surveyId) {
+    if (!surveyIdOrShortId) {
       return content.json({ success: false, message: 'Please provide a valid survey id.' }, 400)
     }
 
@@ -433,10 +439,10 @@ const submitSurvey = async (content: Context<AppEnv>) => {
 
         setCookie(content, 'guest_session_id', trackerId, {
           path: '/',
-          secure: true,
+          secure: credentialProvider.NODE_ENV === 'production',
           httpOnly: true,
           maxAge: 60 * 60 * 24 * 30,
-          sameSite: 'Lax',
+          sameSite: credentialProvider.NODE_ENV === 'development' ? 'lax' : 'none',
         })
       }
     }
@@ -449,8 +455,10 @@ const submitSurvey = async (content: Context<AppEnv>) => {
 
     const prisma = connectDB(content.env.DATABASE_URL)
 
-    const survey = await prisma.survey.findUnique({
-      where: { id: surveyId },
+    const survey = await prisma.survey.findFirst({
+      where: {
+        OR: [{ id: surveyIdOrShortId }, { shortId: surveyIdOrShortId }],
+      },
       include: { questions: true },
     })
 
@@ -496,7 +504,7 @@ const submitSurvey = async (content: Context<AppEnv>) => {
 
     const existingSubmission = await prisma.surveyAnswer.findFirst({
       where: {
-        question: { surveyId: surveyId },
+        question: { surveyId: survey.id },
         OR: [
           ...(dbUserId ? [{ userId: dbUserId }] : []),
           { value: { startsWith: `[track:${trackerId}]` } },
@@ -557,7 +565,7 @@ const submitSurvey = async (content: Context<AppEnv>) => {
 
     operations.push(
       prisma.survey.update({
-        where: { id: surveyId },
+        where: { id: survey.id },
         data: {
           answeredCount: existingSubmission ? undefined : { increment: 1 },
         },
@@ -575,10 +583,10 @@ const submitSurvey = async (content: Context<AppEnv>) => {
 
 const getSurveyResponses = async (content: Context<AppEnv>) => {
   try {
-    const surveyId = content.req.param('id')
+    const surveyIdOrShortId = content.req.param('id')
     const userId = content.get('user').id
 
-    if (!surveyId) {
+    if (!surveyIdOrShortId) {
       return content.json({ success: false, message: 'Please provide a valid survey id.' }, 400)
     }
 
@@ -586,7 +594,7 @@ const getSurveyResponses = async (content: Context<AppEnv>) => {
 
     const survey = await prisma.survey.findFirst({
       where: {
-        id: surveyId,
+        OR: [{ id: surveyIdOrShortId }, { shortId: surveyIdOrShortId }],
       },
       include: {
         questions: {

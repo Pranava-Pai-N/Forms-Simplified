@@ -33,6 +33,7 @@ model Survey {
   createdAt     DateTime   @default(now())
   coverImage    String
   primaryColor  String
+  shortId       String
   isPublished   Boolean    @default(false)
   answeredCount Int
   creator       User       @relation("SurveyCreator", fields: [creatorId], references: [id], onDelete: Cascade)

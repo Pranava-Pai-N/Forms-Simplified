@@ -20,6 +20,7 @@ export type Survey = {
   answeredCount: number
   createdAt: string
   questions: Question[]
+  shortId: string
 }
 
 export type SurveyPayload = {
