@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react'
 import { requireAuth } from '@/components/authenticatedRoutes'
 import { getSurveyResponses } from '../../lib/api'
 import type { Question } from '../../lib/types'
+import { ArrowLeft, Download } from 'lucide-react'
+import xlsx from 'json-as-xlsx'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/survey/$id/responses')({
   beforeLoad: requireAuth as (opts: unknown) => Promise<void>,
@@ -34,6 +37,8 @@ function SurveyResponsesPage() {
   const [responsesCount, setResponsesCount] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [filename, setFileName] = useState<string>('')
+  const [exportfile, setExportFile] = useState(false)
 
   useEffect(() => {
     const loadAnalyticsData = async () => {
@@ -54,6 +59,88 @@ function SurveyResponsesPage() {
 
     loadAnalyticsData()
   }, [id])
+
+  const handleExport = () => {
+    if (!survey) {
+      toast.error('Data is not available. Please try again later')
+      return
+    }
+
+    if (filename === null) return
+
+    const finalFileName = filename.trim()
+
+    const dataToExport = survey.questions.map((question, index) => {
+      return {
+        sheet: `Question No -${index}`,
+        columns: [
+          { label: 'Question', value: 'question' },
+          { label: 'Submitted by', value: 'submitted' },
+          { label: 'Question Type', value: 'type' },
+          { label: 'Response Value', value: 'value' },
+          { label: 'Submitted At', value: 'createdAt' },
+        ],
+        content: question.answers.map((answer) => ({
+          question: question.text,
+          submitted: answer.userId === null ? answer.guestId : answer.userId,
+          type: question.type,
+          value: answer.value,
+          createdAt: new Date(answer.createdAt).toLocaleString(),
+        })),
+      }
+    })
+
+    const fileSettings = {
+      fileName: finalFileName,
+      extraLength: 3,
+      writeMode: 'writeFile',
+      writeOptions: {},
+      RTL: false,
+    }
+
+    xlsx(dataToExport, fileSettings)
+  }
+
+  if (exportfile) {
+    return (
+      <div className="space-y-8">
+        {exportfile && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl transition-all">
+              <form onSubmit={handleExport} className="mt-4">
+                <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+                  Give your file a custom name
+                </p>
+                <input
+                  type="text"
+                  required
+                  value={filename}
+                  placeholder={`${survey?.title} Responses`}
+                  onChange={(e) => setFileName(e.target.value)}
+                  className="w-full mt-4 rounded-xl border border-slate-700 bg-slate-950 p-3 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                />
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setExportFile(false)}
+                    className="rounded-full bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500"
+                  >
+                    Download File
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -155,7 +242,8 @@ function SurveyResponsesPage() {
                 Live Dashboard
               </span>
               <span className="text-xs text-slate-500">
-                {responsesCount} Unique Submissions Total
+                {responsesCount} Unique {responsesCount === 1 ? 'Submission' : 'Submissions'} in
+                Total
               </span>
             </div>
             <h1 className="mt-3 text-3xl font-semibold text-white">{survey.title}</h1>
@@ -164,12 +252,27 @@ function SurveyResponsesPage() {
                 'Reviewing user & guest insights aggregate distribution matrices.'}
             </p>
           </div>
-          <Link
-            to="/dashboard"
-            className="self-start rounded-full bg-slate-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 sm:self-center"
-          >
-            Dashboard
-          </Link>
+
+          <div className="flex flex-wrap items-center gap-3 self-start sm:self-center">
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-2 rounded-full bg-slate-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Dashboard</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setExportFile(true)
+                handleExport
+              }}
+              className="flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export to Excel</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -177,9 +280,8 @@ function SurveyResponsesPage() {
 
       {!responsesCount ? (
         <div className="rounded-3xl border border-dashed border-slate-800 bg-slate-900/40 p-12 text-center text-slate-400">
-          <p className="text-lg font-medium text-white">No entries logged yet</p>
           <p className="mt-2 text-sm text-slate-500">
-            Share the public distribution route link to accumulate tracking metric logs.
+            No responses found. Please share the form to generate responses.
           </p>
         </div>
       ) : null}
