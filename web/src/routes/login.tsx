@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from '../hooks/useAuth'
+import { Eye, EyeOff } from 'lucide-react'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -13,6 +14,7 @@ function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -57,14 +59,25 @@ function LoginPage() {
           />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-300">Password</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-indigo-500"
-            required
-          />
+          <div className="flex flex-col">
+            <span className="text-sm text-slate-300">Password</span>
+            <div className="relative mt-2 w-full">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full rounded-2xl border border-slate-800 bg-slate-950 pl-4 pr-12 py-3 text-white outline-none transition focus:border-indigo-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 focus:outline-none transition"
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
         </label>
         <button
           type="submit"
