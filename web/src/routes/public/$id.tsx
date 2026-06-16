@@ -18,6 +18,7 @@ function PublicSurveyPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [primaryColor, setPrimaryColor] = useState<string>('')
   const navigate = useNavigate()
   const guestId = useMemo(() => getGuestId(), [])
 
@@ -26,6 +27,7 @@ function PublicSurveyPage() {
       try {
         const response = await getSurvey(id)
         setSurvey(response.survey)
+        setPrimaryColor(response.survey.primaryColor)
       } catch {
         setNotFound(true)
       } finally {
@@ -64,7 +66,8 @@ function PublicSurveyPage() {
         <p className="mt-3">The survey link is invalid or the form has been removed.</p>
         <Link
           to="/"
-          className="mt-6 inline-flex rounded-full bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
+          className="mt-6 inline-flex rounded-full px-5 py-3 text-sm font-semibold text-white filter brightness-110 transition hover:brightness-125"
+          style={{ backgroundColor: primaryColor || '#6366f1' }}
         >
           Back to home
         </Link>
@@ -134,7 +137,8 @@ function PublicSurveyPage() {
         <button
           type="button"
           onClick={() => navigate({ to: '/' })}
-          className="mt-6 rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
+          className="mt-6 rounded-full px-6 py-3 text-sm font-semibold text-white filter brightness-110 transition hover:brightness-125"
+          style={{ backgroundColor: primaryColor || '#6366f1' }}
         >
           Back to home
         </button>
@@ -153,7 +157,7 @@ function PublicSurveyPage() {
           <div className="flex items-center gap-3">
             <span
               className="h-4 w-4 rounded-full"
-              style={{ backgroundColor: survey.primaryColor }}
+              style={{ backgroundColor: primaryColor || '#6366f1' }}
             />
             <p className="text-sm uppercase tracking-[0.3em] text-slate-500">{survey.title}</p>
           </div>
@@ -198,40 +202,73 @@ function PublicSurveyPage() {
                   disabled={submitting}
                   value={answers[question.id] ?? ''}
                   onChange={(event) => handleAnswerChange(question, event.target.value)}
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-indigo-500 disabled:opacity-50"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition disabled:opacity-50"
+                  style={{
+                    ['--focus-color' as string]: primaryColor || '#6366f1',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = 'var(--focus-color)')}
+                  onBlur={(e) => (e.target.style.borderColor = '#334155')}
                   placeholder="Type your answer"
                 />
               )}
 
               {question.type === 'rating' && (
                 <div className="grid grid-cols-5 gap-3">
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <button
-                      key={value}
-                      disabled={submitting}
-                      type="button"
-                      onClick={() => handleAnswerChange(question, String(value))}
-                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${answers[question.id] === String(value) ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}
-                    >
-                      {value}
-                    </button>
-                  ))}
+                  {[1, 2, 3, 4, 5].map((value) => {
+                    const isSelected = answers[question.id] === String(value)
+                    return (
+                      <button
+                        key={value}
+                        disabled={submitting}
+                        type="button"
+                        onClick={() => handleAnswerChange(question, String(value))}
+                        className="rounded-2xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-50"
+                        style={{
+                          backgroundColor: isSelected ? primaryColor || '#6366f1' : '#0f172a',
+                          borderColor: isSelected ? primaryColor || '#6366f1' : '#334155',
+                          color: isSelected ? '#ffffff' : '#e2e8f0',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) e.currentTarget.style.borderColor = '#64748b'
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.borderColor = '#334155'
+                        }}
+                      >
+                        {value}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
 
               {question.type === 'multiple_choice' && (
                 <div className="grid gap-3">
-                  {(question.options ?? []).map((option) => (
-                    <button
-                      key={option}
-                      disabled={submitting}
-                      type="button"
-                      onClick={() => handleAnswerChange(question, option)}
-                      className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition disabled:opacity-50 ${answers[question.id] === option ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}
-                    >
-                      {option}
-                    </button>
-                  ))}
+                  {(question.options ?? []).map((option) => {
+                    const isSelected = answers[question.id] === option
+                    return (
+                      <button
+                        key={option}
+                        disabled={submitting}
+                        type="button"
+                        onClick={() => handleAnswerChange(question, option)}
+                        className="rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition disabled:opacity-50"
+                        style={{
+                          backgroundColor: isSelected ? primaryColor || '#6366f1' : '#0f172a',
+                          borderColor: isSelected ? primaryColor || '#6366f1' : '#334155',
+                          color: isSelected ? '#ffffff' : '#e2e8f0',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) e.currentTarget.style.borderColor = '#64748b'
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.borderColor = '#334155'
+                        }}
+                      >
+                        {option}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -241,7 +278,10 @@ function PublicSurveyPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-2xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:bg-indigo-500/50 disabled:cursor-not-allowed"
+          className="w-full rounded-2xl px-6 py-3 text-sm font-semibold text-white transition disabled:opacity-50 disabled:cursor-not-allowed filter brightness-110 hover:brightness-125"
+          style={{
+            backgroundColor: primaryColor || '#6366f1',
+          }}
         >
           {submitting ? 'Submitting response...' : 'Submit response'}
         </button>
