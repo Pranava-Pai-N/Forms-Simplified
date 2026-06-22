@@ -3,6 +3,7 @@ import type { Context, Next } from 'hono'
 import { getCookie } from 'hono/cookie'
 import jwt from 'jsonwebtoken'
 import credentialProvider from '../env'
+import { error } from 'node:console'
 
 type UserContext = {
   id: string
@@ -50,8 +51,26 @@ const authMiddleware = async (content: Context<AppEnv>, next: Next) => {
 
     content.set('user', decodedToken)
     await next()
-  } catch (_error) {
-    console.log('Error finding the user. Please try again later ..')
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return content.json(
+        {
+          success: false,
+          message: 'Token expired',
+        },
+        401,
+      )
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      return content.json(
+        {
+          success: false,
+          message: 'Token error. Please try again later',
+        },
+        401,
+      )
+    }
 
     return content.json(
       {
