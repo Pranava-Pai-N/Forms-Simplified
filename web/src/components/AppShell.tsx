@@ -64,14 +64,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   to="/login"
                   className="rounded-full bg-slate-900 border border-slate-800 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white active:scale-95"
                 >
-                  Login
+                  Login to your account
                 </Link>
 
                 <Link
                   to="/signup"
                   className="rounded-full bg-indigo-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-indigo-500/10 transition hover:bg-indigo-400 active:scale-95"
                 >
-                  Sign up
+                  New User ? Sign up
                 </Link>
               </div>
             )}
