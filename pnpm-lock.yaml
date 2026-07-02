@@ -35,9 +35,15 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
+      '@types/mime-types':
+        specifier: ^3.0.1
+        version: 3.0.1
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
+      cloudinary:
+        specifier: ^2.10.0
+        version: 2.10.0
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -47,6 +53,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
+      mime-types:
+        specifier: ^3.0.2
+        version: 3.0.2
       nanoid:
         specifier: ^5.1.11
         version: 5.1.11
@@ -1996,6 +2005,9 @@ packages:
   '@types/jsonwebtoken@9.0.10':
     resolution: {integrity: sha512-asx5hIG9Qmf/1oStypjanR7iKTv0gXQ1Ov/jfrX6kS/EO0OFni8orbmGCn0672NHR3kXHwpAwR+B368ZGN/2rA==}
 
+  '@types/mime-types@3.0.1':
+    resolution: {integrity: sha512-xRMsfuQbnRq1Ef+C+RKaENOxXX87Ygl38W1vDfPHRku02TgQr+Qd8iivLtAMcR0KF5/29xlnFihkTlbqFrGOVQ==}
+
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
@@ -2196,6 +2208,10 @@ packages:
   cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
+
+  cloudinary@2.10.0:
+    resolution: {integrity: sha512-sY09kYg7wprkndAOjZBAYqFZqwL+SxnEGcAvksOvFA+5upnFn949UjkEkHKNSwkBtW/xRDd0p6NgbSXZcxkI3w==}
+    engines: {node: '>=9'}
 
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
@@ -2919,6 +2935,9 @@ packages:
 
   lodash.once@4.1.1:
     resolution: {integrity: sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==}
+
+  lodash@4.18.1:
+    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   log-symbols@6.0.0:
     resolution: {integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==}
@@ -5678,6 +5697,8 @@ snapshots:
       '@types/ms': 2.1.0
       '@types/node': 25.9.2
 
+  '@types/mime-types@3.0.1': {}
+
   '@types/ms@2.1.0': {}
 
   '@types/node@25.9.2':
@@ -5875,6 +5896,10 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
+
+  cloudinary@2.10.0:
+    dependencies:
+      lodash: 4.18.1
 
   clsx@2.1.1: {}
 
@@ -6514,6 +6539,8 @@ snapshots:
   lodash.isstring@4.0.1: {}
 
   lodash.once@4.1.1: {}
+
+  lodash@4.18.1: {}
 
   log-symbols@6.0.0:
     dependencies:
