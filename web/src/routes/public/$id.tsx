@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { getSurvey, submitSurvey } from '../../lib/api'
 import { getGuestId, hasSubmittedSurvey, submitSurveyResponse } from '../../lib/storage'
 import type { Question, Survey } from '../../lib/types'
@@ -8,6 +8,12 @@ import { toast } from 'sonner'
 export const Route = createFileRoute('/public/$id')({
   component: PublicSurveyPage,
 })
+
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME ?? ""
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET ?? ""
+
+const DEFAULT_UPI_ID = import.meta.env.VITE_DEFAULT_UPI_ID ?? ""
+const DEFAULT_PAYMENT_AMOUNT = import.meta.env.VITE_DEFAULT_PAYMENT_AMOUNT ?? ""
 
 function PublicSurveyPage() {
   const { id } = Route.useParams() as { id: string }
@@ -19,6 +25,11 @@ function PublicSurveyPage() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [primaryColor, setPrimaryColor] = useState<string>('')
+
+  const [uploadingState, setUploadingState] = useState<Record<string, boolean>>({})
+  const [activePaymentQuestionId, setActivePaymentQuestionId] = useState<string | null>(null)
+
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
   const navigate = useNavigate()
   const guestId = useMemo(() => getGuestId(), [])
 
@@ -50,6 +61,47 @@ function PublicSurveyPage() {
       ),
     )
   }, [survey])
+
+  const handleFileUpload = async (questionId: string, file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error('Please provide screenshot image of the payment')
+      return;
+    }
+
+    setUploadingState((prev) => ({ ...prev, [questionId]: true }))
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+
+    try {
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
+      const data = await res.json()
+
+      if (data.secure_url) {
+        setAnswers((current) => ({ ...current, [questionId]: data.secure_url }))
+        toast.success('File uploaded successfully!')
+        setActivePaymentQuestionId(null)
+      } else {
+        toast.error('Cloudinary upload failed. Check cloud name and preset.')
+      }
+    } catch {
+      toast.error('Failed to upload file.')
+    } finally {
+      setUploadingState((prev) => ({ ...prev, [questionId]: false }))
+    }
+  }
+
+  const getUpiQrUrl = (upiId: string, name: string, amount: string) => {
+    const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name)}&am=${encodeURIComponent(amount)}&cu=INR`
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`
+  }
 
   if (loading) {
     return (
@@ -185,7 +237,9 @@ function PublicSurveyPage() {
                     ? 'Short answer'
                     : question.type === 'multiple_choice'
                       ? 'Multiple choice'
-                      : 'Rating'}
+                      : question.type === 'file'
+                        ? 'Payment & File Upload'
+                        : 'Rating'}
                 </p>
                 <p className="mt-2 text-lg font-semibold text-white">{question.text}</p>
               </div>
@@ -269,6 +323,115 @@ function PublicSurveyPage() {
                       </button>
                     )
                   })}
+                </div>
+              )}
+
+              {question.type === 'file' && (
+                <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/80 p-6">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={(el) => {
+                      fileInputRefs.current[question.id] = el
+                    }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file)
+                        handleFileUpload(question.id, file)
+                    }}
+                    className="hidden"
+                  />
+
+                  {!activePaymentQuestionId && !answers[question.id] && (
+                    <div className="flex flex-col items-center justify-center space-y-3 text-center">
+                      <div className="rounded-full bg-emerald-500/10 p-3 text-emerald-400">
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-slate-200">
+                          Scan GPay QR & Upload Payment Proof
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Pay ₹{DEFAULT_PAYMENT_AMOUNT} and upload the transaction screenshot
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={submitting}
+                        onClick={() => setActivePaymentQuestionId(question.id)}
+                        className="mt-2 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-50"
+                      >
+                        Pay via GPay & Upload File
+                      </button>
+                    </div>
+                  )}
+
+                  {activePaymentQuestionId === question.id && (
+                    <div className="flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="rounded-2xl bg-white p-3 shadow-lg">
+                        <img
+                          src={getUpiQrUrl(DEFAULT_UPI_ID, survey.title, DEFAULT_PAYMENT_AMOUNT)}
+                          alt="GPay QR Code"
+                          className="h-44 w-44 rounded-lg"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                          Scan with GPay / PhonePe / Paytm
+                        </p>
+                        <p className="text-sm text-slate-300 font-mono">
+                          UPI ID: <span className="text-white font-bold">{DEFAULT_UPI_ID}</span>
+                        </p>
+                        <p className="text-sm text-slate-300">
+                          Amount: <span className="text-emerald-400 font-bold">₹{DEFAULT_PAYMENT_AMOUNT}</span>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full max-w-xs">
+                        <button
+                          type="button"
+                          disabled={uploadingState[question.id] || submitting}
+                          onClick={() => fileInputRefs.current[question.id]?.click()}
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+                        >
+                          {uploadingState[question.id] ? 'Uploading...' : 'Upload Screenshot / File'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActivePaymentQuestionId(null)}
+                          className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-700 transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {answers[question.id] && (
+                    <div className="flex flex-col items-center justify-center space-y-2 text-center">
+                      <div className="flex items-center gap-2 text-sm font-medium text-emerald-400 bg-emerald-500/10 px-4 py-2.5 rounded-2xl border border-emerald-500/20 max-w-full truncate">
+                        <span>✓ Uploaded:</span>
+                        <a
+                          href={answers[question.id]}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline truncate hover:text-emerald-300"
+                        >
+                          View Uploaded File
+                        </a>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRefs.current[question.id]?.click()}
+                        className="text-xs text-slate-400 underline hover:text-slate-200 mt-1"
+                      >
+                        Change file / re-upload
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

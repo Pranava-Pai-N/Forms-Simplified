@@ -1,4 +1,4 @@
-export type QuestionType = 'short_text' | 'rating' | 'multiple_choice'
+export type QuestionType = 'short_text' | 'rating' | 'multiple_choice' | 'file'
 
 export type Question = {
   id: string
