@@ -13,15 +13,14 @@ const questionTypes: Array<{ label: string; value: QuestionType }> = [
   { label: 'Short answer', value: 'short_text' },
   { label: 'Multiple choice', value: 'multiple_choice' },
   { label: 'Rating', value: 'rating' },
-  { label: 'File', value: 'file' }
+  { label: 'File', value: 'file' },
 ]
 
-const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME ?? ""
-const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET ?? ""
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME ?? ''
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET ?? ''
 
-const DEFAULT_UPI_ID = import.meta.env.VITE_DEFAULT_UPI_ID ?? ""
-const DEFAULT_PAYMENT_AMOUNT = import.meta.env.VITE_DEFAULT_PAYMENT_AMOUNT ?? ""
-
+const DEFAULT_UPI_ID = import.meta.env.VITE_DEFAULT_UPI_ID ?? ''
+const DEFAULT_PAYMENT_AMOUNT = import.meta.env.VITE_DEFAULT_PAYMENT_AMOUNT ?? ''
 
 function SurveyEditorPage() {
   const { id } = Route.useParams() as { id: string }
@@ -66,8 +65,7 @@ function SurveyEditorPage() {
   }, [id])
 
   useEffect(() => {
-    if (!survey) 
-      return;
+    if (!survey) return
 
     setTitle(survey.title)
     setDescription(survey.description ?? '')
@@ -85,7 +83,9 @@ function SurveyEditorPage() {
     setRawOptionsInput(freshStrings)
   }, [survey])
 
-  const handleCloudinaryUpload = async (file: File): Promise<{ url: string; public_id: string } | null> => {
+  const handleCloudinaryUpload = async (
+    file: File,
+  ): Promise<{ url: string; public_id: string } | null> => {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
@@ -96,7 +96,7 @@ function SurveyEditorPage() {
         {
           method: 'POST',
           body: formData,
-        }
+        },
       )
       const data = await res.json()
       if (data.secure_url) {
@@ -125,13 +125,16 @@ function SurveyEditorPage() {
     }
   }
 
-  const handleQuestionFileUpload = async (questionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleQuestionFileUpload = async (
+    questionId: string,
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     setFileUploadState((prev) => ({
       ...prev,
-      [questionId]: { ...prev[questionId], loading: true }
+      [questionId]: { ...prev[questionId], loading: true },
     }))
 
     const result = await handleCloudinaryUpload(file)
@@ -139,14 +142,14 @@ function SurveyEditorPage() {
     if (result?.url) {
       setFileUploadState((prev) => ({
         ...prev,
-        [questionId]: { loading: false, url: result.url, name: file.name, paid: true }
+        [questionId]: { loading: false, url: result.url, name: file.name, paid: true },
       }))
       setMessage(`Payment receipt / file "${file.name}" uploaded successfully!`)
       setActivePaymentQuestionId(null)
     } else {
       setFileUploadState((prev) => ({
         ...prev,
-        [questionId]: { ...prev[questionId], loading: false }
+        [questionId]: { ...prev[questionId], loading: false },
       }))
     }
   }
@@ -180,8 +183,7 @@ function SurveyEditorPage() {
   }
 
   const handleQuestionChange = (questionId: string, update: Partial<Question>) => {
-    if (isReadOnly) 
-      return
+    if (isReadOnly) return
 
     setQuestions((current) =>
       current.map((question) => {
@@ -643,8 +645,19 @@ function SurveyEditorPage() {
                       {!activePaymentQuestionId && !fileUploadState[question.id]?.url && (
                         <div className="flex flex-col items-center justify-center space-y-3 text-center">
                           <div className="rounded-full bg-emerald-500/10 p-3 text-emerald-400">
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg
+                              className="h-6 w-6"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              aria-label="Payment Details"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
                             </svg>
                           </div>
                           <div>
@@ -669,7 +682,11 @@ function SurveyEditorPage() {
                         <div className="flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
                           <div className="rounded-2xl bg-white p-3 shadow-lg">
                             <img
-                              src={getUpiQrUrl(DEFAULT_UPI_ID, survey.title || 'Payment', DEFAULT_PAYMENT_AMOUNT)}
+                              src={getUpiQrUrl(
+                                DEFAULT_UPI_ID,
+                                survey.title || 'Payment',
+                                DEFAULT_PAYMENT_AMOUNT,
+                              )}
                               alt="GPay QR Code"
                               className="h-44 w-44 rounded-lg"
                             />
@@ -683,7 +700,10 @@ function SurveyEditorPage() {
                               UPI ID: <span className="text-white font-bold">{DEFAULT_UPI_ID}</span>
                             </p>
                             <p className="text-sm text-slate-300">
-                              Amount: <span className="text-emerald-400 font-bold">₹{DEFAULT_PAYMENT_AMOUNT}</span>
+                              Amount:{' '}
+                              <span className="text-emerald-400 font-bold">
+                                ₹{DEFAULT_PAYMENT_AMOUNT}
+                              </span>
                             </p>
                           </div>
 
@@ -696,9 +716,25 @@ function SurveyEditorPage() {
                             >
                               {fileUploadState[question.id]?.loading ? (
                                 <>
-                                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  <svg
+                                    className="animate-spin h-4 w-4 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    aria-label="Payment Details"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
                                   </svg>
                                   Uploading...
                                 </>
@@ -727,7 +763,8 @@ function SurveyEditorPage() {
                               rel="noreferrer"
                               className="underline truncate hover:text-emerald-300"
                             >
-                              {fileUploadState[question.id]?.name || fileUploadState[question.id]?.url}
+                              {fileUploadState[question.id]?.name ||
+                                fileUploadState[question.id]?.url}
                             </a>
                           </div>
                           <button

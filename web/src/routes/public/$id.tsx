@@ -9,11 +9,11 @@ export const Route = createFileRoute('/public/$id')({
   component: PublicSurveyPage,
 })
 
-const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME ?? ""
-const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET ?? ""
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME ?? ''
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET ?? ''
 
-const DEFAULT_UPI_ID = import.meta.env.VITE_DEFAULT_UPI_ID ?? ""
-const DEFAULT_PAYMENT_AMOUNT = import.meta.env.VITE_DEFAULT_PAYMENT_AMOUNT ?? ""
+const DEFAULT_UPI_ID = import.meta.env.VITE_DEFAULT_UPI_ID ?? ''
+const DEFAULT_PAYMENT_AMOUNT = import.meta.env.VITE_DEFAULT_PAYMENT_AMOUNT ?? ''
 
 function PublicSurveyPage() {
   const { id } = Route.useParams() as { id: string }
@@ -63,9 +63,9 @@ function PublicSurveyPage() {
   }, [survey])
 
   const handleFileUpload = async (questionId: string, file: File) => {
-    if (!file.type.startsWith("image/")) {
+    if (!file.type.startsWith('image/')) {
       toast.error('Please provide screenshot image of the payment')
-      return;
+      return
     }
 
     setUploadingState((prev) => ({ ...prev, [questionId]: true }))
@@ -80,7 +80,7 @@ function PublicSurveyPage() {
         {
           method: 'POST',
           body: formData,
-        }
+        },
       )
       const data = await res.json()
 
@@ -336,8 +336,7 @@ function PublicSurveyPage() {
                     }}
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file)
-                        handleFileUpload(question.id, file)
+                      if (file) handleFileUpload(question.id, file)
                     }}
                     className="hidden"
                   />
@@ -345,8 +344,19 @@ function PublicSurveyPage() {
                   {!activePaymentQuestionId && !answers[question.id] && (
                     <div className="flex flex-col items-center justify-center space-y-3 text-center">
                       <div className="rounded-full bg-emerald-500/10 p-3 text-emerald-400">
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          aria-label="Payment Details"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
                       </div>
                       <div>
@@ -386,7 +396,10 @@ function PublicSurveyPage() {
                           UPI ID: <span className="text-white font-bold">{DEFAULT_UPI_ID}</span>
                         </p>
                         <p className="text-sm text-slate-300">
-                          Amount: <span className="text-emerald-400 font-bold">₹{DEFAULT_PAYMENT_AMOUNT}</span>
+                          Amount:{' '}
+                          <span className="text-emerald-400 font-bold">
+                            ₹{DEFAULT_PAYMENT_AMOUNT}
+                          </span>
                         </p>
                       </div>
 
@@ -397,7 +410,9 @@ function PublicSurveyPage() {
                           onClick={() => fileInputRefs.current[question.id]?.click()}
                           className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
                         >
-                          {uploadingState[question.id] ? 'Uploading...' : 'Upload Screenshot / File'}
+                          {uploadingState[question.id]
+                            ? 'Uploading...'
+                            : 'Upload Screenshot / File'}
                         </button>
                         <button
                           type="button"
