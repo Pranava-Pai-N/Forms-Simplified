@@ -60,38 +60,56 @@ function SurveyResponsesPage() {
     loadAnalyticsData()
   }, [id])
 
+
   const handleExport = () => {
     if (!survey) {
       toast.error('Data is not available. Please try again later')
       return
     }
 
-    if (filename === null) return
+    if (filename === null) return;
 
     const finalFileName = filename.trim()
 
-    const allResponses = survey.questions.flatMap((question, index: number) => {
-      return question.answers.map((ans) => ({
-        questionNumber: `Question ${index + 1}`,
-        question: question.text,
-        submitted: ans.userId === null ? ans.guestId : ans.userId,
-        type: question.type,
-        value: ans.value,
-        createdAt: new Date(ans.createdAt).toLocaleString(),
-      }))
+    const dynamicColumns = [
+      { label: 'Submitted by', value: 'submitted' },
+      { label: 'Submitted At', value: 'createdAt' },
+      ...survey.questions.map((question, index: number) => ({
+        label: `Q${index + 1}: ${question.text}`,
+        value: `q_${index + 1}`,
+      })),
+    ]
+
+    const responsesMap = new Map<string, Record<string, any>>()
+
+    survey.questions.forEach((question, qIndex: number) => {
+      const qKey = `q_${qIndex + 1}`
+
+      question.answers.forEach((ans) => {
+        const rawId = ans.userId ?? ans.guestId ?? 'Anonymous'
+        const responderId = String(rawId)
+
+        if (!responsesMap.has(responderId)) {
+          responsesMap.set(responderId, {
+            submitted: responderId,
+            createdAt: new Date(ans.createdAt).toLocaleString(),
+          })
+        }
+
+        const userRow = responsesMap.get(responderId)
+        if (userRow) {
+          userRow[qKey] = ans.value
+        }
+      })
     })
+
+    const contentRows = Array.from(responsesMap.values())
 
     const dataToExport = [
       {
         sheet: `${survey.title} Responses`,
-        columns: [
-          { label: 'Question', value: 'question' },
-          { label: 'Submitted by', value: 'submitted' },
-          { label: 'Question Type', value: 'type' },
-          { label: 'Response Value', value: 'value' },
-          { label: 'Submitted At', value: 'createdAt' },
-        ],
-        content: allResponses,
+        columns: dynamicColumns,
+        content: contentRows,
       },
     ]
 
