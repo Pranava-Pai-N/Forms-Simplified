@@ -99,8 +99,7 @@ function PublicSurveyPage() {
   }
 
   const getUpiQrUrl = (upiId: string, name: string, amount: string) => {
-    const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name)}&am=${encodeURIComponent(amount)}&cu=INR`
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`
+    return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name)}&am=${encodeURIComponent(amount)}&cu=INR`
   }
 
   if (loading) {
@@ -361,20 +360,31 @@ function PublicSurveyPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-slate-200">
-                          Scan GPay QR & Upload Payment Proof
+                          Pay via UPI App or Scan QR
                         </p>
                         <p className="text-xs text-slate-500 mt-1">
                           Pay ₹{DEFAULT_PAYMENT_AMOUNT} and upload the transaction screenshot
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        disabled={submitting}
-                        onClick={() => setActivePaymentQuestionId(question.id)}
-                        className="mt-2 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-50"
-                      >
-                        Pay via GPay & Upload File
-                      </button>
+
+                      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs mt-2">
+                        <a
+                          href={getUpiQrUrl(DEFAULT_UPI_ID, survey.title, DEFAULT_PAYMENT_AMOUNT)}
+                          onClick={() => setActivePaymentQuestionId(question.id)}
+                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 text-center w-full"
+                        >
+                          Open UPI App (GPay/Paytm/PhonePe)
+                        </a>
+
+                        <button
+                          type="button"
+                          disabled={submitting}
+                          onClick={() => setActivePaymentQuestionId(question.id)}
+                          className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-700 transition w-full"
+                        >
+                          Show QR Code
+                        </button>
+                      </div>
                     </div>
                   )}
 

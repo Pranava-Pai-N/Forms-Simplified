@@ -45,9 +45,9 @@ function SurveyResponsesPage() {
       try {
         setLoading(true)
         const response = await getSurveyResponses(id)
-        console.log(response)
 
         setSurvey(response.survey)
+        setFileName(response.survey.title + " Responses");
         setResponsesCount(response.responseResult.length)
       } catch (error) {
         console.error('Failed to load response data:', error)
@@ -66,13 +66,25 @@ function SurveyResponsesPage() {
       return
     }
 
-    if (filename === null) return
+    if (filename === null)
+      return;
 
-    const finalFileName = filename.trim()
+    const finalFileName = filename.trim();
 
-    const dataToExport = survey.questions.map((question, index) => {
-      return {
-        sheet: `Question No -${index}`,
+    const allResponses = survey.questions.flatMap((question, index: number) => {
+      return question.answers.map((ans) => ({
+        questionNumber: `Question ${index + 1}`,
+        question: question.text,
+        submitted: ans.userId === null ? ans.guestId : ans.userId,
+        type: question.type,
+        value: ans.value,
+        createdAt: new Date(ans.createdAt).toLocaleString(),
+      }))
+    })
+
+    const dataToExport = [
+      {
+        sheet: `${survey.title} Responses`,
         columns: [
           { label: 'Question', value: 'question' },
           { label: 'Submitted by', value: 'submitted' },
@@ -80,15 +92,9 @@ function SurveyResponsesPage() {
           { label: 'Response Value', value: 'value' },
           { label: 'Submitted At', value: 'createdAt' },
         ],
-        content: question.answers.map((answer) => ({
-          question: question.text,
-          submitted: answer.userId === null ? answer.guestId : answer.userId,
-          type: question.type,
-          value: answer.value,
-          createdAt: new Date(answer.createdAt).toLocaleString(),
-        })),
+        content: allResponses
       }
-    })
+    ]
 
     const fileSettings = {
       fileName: finalFileName,
