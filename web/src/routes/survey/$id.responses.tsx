@@ -47,7 +47,7 @@ function SurveyResponsesPage() {
         const response = await getSurveyResponses(id)
 
         setSurvey(response.survey)
-        setFileName(response.survey.title + " Responses");
+        setFileName(`${response.survey.title} Responses`)
         setResponsesCount(response.responseResult.length)
       } catch (error) {
         console.error('Failed to load response data:', error)
@@ -66,10 +66,9 @@ function SurveyResponsesPage() {
       return
     }
 
-    if (filename === null)
-      return;
+    if (filename === null) return
 
-    const finalFileName = filename.trim();
+    const finalFileName = filename.trim()
 
     const allResponses = survey.questions.flatMap((question, index: number) => {
       return question.answers.map((ans) => ({
@@ -92,8 +91,8 @@ function SurveyResponsesPage() {
           { label: 'Response Value', value: 'value' },
           { label: 'Submitted At', value: 'createdAt' },
         ],
-        content: allResponses
-      }
+        content: allResponses,
+      },
     ]
 
     const fileSettings = {
