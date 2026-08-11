@@ -99,7 +99,12 @@ function PublicSurveyPage() {
   }
 
   const getUpiQrUrl = (upiId: string, name: string, amount: string) => {
-    return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name)}&am=${encodeURIComponent(amount)}&cu=INR`
+    return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name)}&am=${encodeURIComponent(amount)}&cu=INR`;
+  }
+
+  const getImageQR = (upiId: string, name: string, amount: string) => {
+    const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name)}&am=${encodeURIComponent(amount)}&cu=INR`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`
   }
 
   if (loading) {
@@ -392,7 +397,7 @@ function PublicSurveyPage() {
                     <div className="flex flex-col items-center justify-center text-center space-y-4">
                       <div className="rounded-2xl bg-white p-3 shadow-lg">
                         <img
-                          src={getUpiQrUrl(DEFAULT_UPI_ID, survey.title, DEFAULT_PAYMENT_AMOUNT)}
+                          src={getImageQR(DEFAULT_UPI_ID, survey.title, DEFAULT_PAYMENT_AMOUNT)}
                           alt="GPay QR Code"
                           className="h-44 w-44 rounded-lg"
                         />
