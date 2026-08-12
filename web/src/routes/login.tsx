@@ -30,6 +30,7 @@ function LoginPage() {
 
       await login({ email, password })
       toast.success('Logged in successfully')
+      navigate({ to: '/dashboard' })
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message)
