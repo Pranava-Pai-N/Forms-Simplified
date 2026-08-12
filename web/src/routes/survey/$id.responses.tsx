@@ -60,7 +60,9 @@ function SurveyResponsesPage() {
     loadAnalyticsData()
   }, [id])
 
-  const handleExport = () => {
+  const handleExport = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+
     if (!survey) {
       toast.error('Data is not available. Please try again later')
       return
@@ -106,7 +108,7 @@ function SurveyResponsesPage() {
 
     const dataToExport = [
       {
-        sheet: `${survey.title} Responses`,
+        sheet: `${survey.title} Responses`.substring(0, 31),
         columns: dynamicColumns,
         content: contentRows,
       },
@@ -121,6 +123,7 @@ function SurveyResponsesPage() {
     }
 
     xlsx(dataToExport, fileSettings)
+    setExportFile(false)
   }
 
   if (exportfile) {
