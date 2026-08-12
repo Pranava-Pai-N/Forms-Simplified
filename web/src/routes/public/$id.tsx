@@ -115,7 +115,7 @@ function PublicSurveyPage() {
     )
   }
 
-  if (notFound || !survey) {
+  if (notFound || !survey || !survey.isPublished) {
     return (
       <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-10 text-center text-slate-300">
         <p className="text-xl font-semibold text-white">Survey not found</p>
