@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 h-16">
           <Link to="/" className="group flex items-center gap-2">
             <h1 className="text-base font-bold tracking-tight text-white group-hover:text-slate-200 transition">
-              Form<span className="text-indigo-400 font-medium">Simplified</span>
+              Forms<span className="text-indigo-400 font-medium">Simplified</span>
             </h1>
           </Link>
 

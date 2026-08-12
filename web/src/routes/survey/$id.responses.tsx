@@ -60,14 +60,13 @@ function SurveyResponsesPage() {
     loadAnalyticsData()
   }, [id])
 
-
   const handleExport = () => {
     if (!survey) {
       toast.error('Data is not available. Please try again later')
       return
     }
 
-    if (filename === null) return;
+    if (filename === null) return
 
     const finalFileName = filename.trim()
 
@@ -80,7 +79,7 @@ function SurveyResponsesPage() {
       })),
     ]
 
-    const responsesMap = new Map<string, Record<string, any>>()
+    const responsesMap = new Map<string, Record<string, string>>()
 
     survey.questions.forEach((question, qIndex: number) => {
       const qKey = `q_${qIndex + 1}`

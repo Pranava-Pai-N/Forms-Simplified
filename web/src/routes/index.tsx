@@ -131,13 +131,23 @@ function Home() {
           <div>&copy;{new Date().getFullYear()}. All rights reserved.</div>
           <div className="flex items-center gap-1.5 text-slate-400">
             Built with
-            <span className="text-indigo-400 hover:text-indigo-300 transition cursor-default">
+            <a
+              target="_blank"
+              href={'https://tanstack.com/query/latest/docs/framework/react/overview'}
+              className="text-indigo-400 hover:text-indigo-300 transition cursor-default"
+              rel="noopener"
+            >
               TanStack Router
-            </span>
+            </a>
             &amp;
-            <span className="text-violet-400 hover:text-violet-300 transition cursor-default">
+            <a
+              target="_blank"
+              href={'https://hono.dev/docs'}
+              className="text-violet-400 hover:text-violet-300 transition cursor-default"
+              rel="noopener"
+            >
               Hono
-            </span>
+            </a>
           </div>
         </div>
       </footer>
